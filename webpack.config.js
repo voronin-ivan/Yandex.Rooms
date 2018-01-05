@@ -57,6 +57,9 @@ module.exports = {
         })
     ],
     resolve: {
-        extensions: ['.js', '*']
+        modules: [
+            path.join(process.cwd(), 'src'),
+            'node_modules'
+        ]
     }
 };

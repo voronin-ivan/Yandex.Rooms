@@ -1,10 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import axios from 'axios';
-import App from './components/App';
+import ActionCreators from 'actions/ActionCreators';
+import App from 'components/App';
 
-axios.get('/api/events')
-    .then(response => console.log(response.data))
+axios.get('/api/data')
+    .then(response => {
+        ActionCreators.setGeneralStore(response.data);
+        ReactDOM.render(<App />, document.getElementById('root'));
+    })
     .catch(error => console.log(error));
-
-ReactDOM.render(<App />, document.getElementById('root'));
