@@ -6,6 +6,7 @@ import { Map } from 'immutable';
 class UIStore extends MyReduceStore {
     getInitialState() {
         return Map({
+            date: new Date(),
             show_form: false,
             event_for_edit: null
         });
@@ -13,6 +14,8 @@ class UIStore extends MyReduceStore {
 
     reduce(state, action) {
         switch (action.type) {
+            case Actions.SET_DATE:
+                return state.set('date', action.payload.date);
             case Actions.SET_SHOW_FORM:
                 return state.set('show_form', action.payload.show_form);
             case Actions.SET_EVENT_FOR_EDIT:

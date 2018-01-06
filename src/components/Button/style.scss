@@ -44,4 +44,30 @@
             background-color: #3C33FF;
         }
     }
+
+    &--icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        padding: 0;
+        border-radius: 100%;
+        background-color: #E9ECEF;
+        cursor: pointer;
+
+        &:hover,
+        &:focus,
+        &:active {
+
+            .icon-fill {
+                fill: #000;
+            }
+
+            .icon-stroke {
+                stroke: #000;
+            }
+        }
+    }
+
 }

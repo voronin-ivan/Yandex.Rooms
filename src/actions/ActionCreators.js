@@ -8,6 +8,12 @@ const actionCreators = {
             payload: { result }
         });
     },
+    setDate(date) {
+        Dispatcher.dispatch({
+            type: Actions.SET_DATE,
+            payload: { date }
+        });
+    },
     setShowForm(show_form) {
         Dispatcher.dispatch({
             type: Actions.SET_SHOW_FORM,

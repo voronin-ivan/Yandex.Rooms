@@ -9,13 +9,19 @@ export default class Button extends Component {
     static propTypes = {
         color: PropTypes.string,
         className: PropTypes.string,
-        onClick: PropTypes.func
+        onClick: PropTypes.func,
+        isIcon: PropTypes.bool
+    }
+
+    static defaultProps = {
+        isIcon: false
     }
 
     render() {
         const buttonClassNames = classNames(
-            'button',
             this.props.className,
+            'button',
+            {'button--icon': this.props.isIcon},
             this.props.color ? `button--${this.props.color}` : ''
         );
 

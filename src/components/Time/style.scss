@@ -1,0 +1,33 @@
+@import '../mixins';
+
+.time {
+    display: flex;
+    align-items: center;
+    width: 1675px;
+    height: 46px;
+    padding-left: 13px;
+    border-bottom: 1px solid #E9ECEF;
+
+    @include mobile {
+        position: absolute;
+        top: 103px;
+        left: 0;
+        width: 1765px;
+        height: 32px;
+        padding-left: 148px;
+    }
+
+    &__item {
+        flex-shrink: 0;
+        width: 66px;
+        font-weight: bold;
+        font-size: 11px;
+        line-height: 13px;
+        color: #252525;
+        text-align: center;
+
+        &--grey {
+            color: #858E98;
+        }
+    }
+}

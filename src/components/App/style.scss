@@ -16,6 +16,39 @@ body {
     box-sizing: border-box;
 }
 
+.app {
+    width: 100%;
+    height: 100%;
+
+    &__spinner {
+        position: absolute;
+        top: 43%;
+        left: 50%;
+        transform: translate(-50%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: auto;
+        height: auto;
+        font-size: 23px;
+
+        &::before {
+            display: block;
+            content: '';
+            width: 38px;
+            height: 38px;
+            margin-right: 10px;
+            background: url('spinner.svg') no-repeat center;
+            background-size: cover;
+        }
+    }
+}
+
+.container {
+    width: 100%;
+    height: 100%;
+}
+
 .wrapper {
     position: relative;
     display: flex;
