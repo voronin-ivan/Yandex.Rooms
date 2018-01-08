@@ -1,0 +1,53 @@
+@import '../mixins';
+
+.date-picker {
+    position: absolute;
+    z-index: 5;
+    top: 0;
+    left: 0;
+    background-color: #fff;
+
+    .DayPicker-wrapper {
+        padding-bottom: 11px;
+        outline: none;
+    }
+
+    .DayPicker-NavButton {
+        top: 10px;
+        right: 15px;
+        outline: none;
+    }
+
+    .DayPicker-Month {
+        margin: 10px 0 0;
+    }
+
+    .DayPicker-Caption {
+        margin-bottom: 0;
+
+        > div {
+            font-size: 18px;
+        }
+    }
+
+    .DayPicker-Day {
+        padding: 6px;
+        font-size: 15px;
+
+        &--today {
+            color: #ff0400;
+        }
+
+        &--disabled {
+            pointer-events: none;
+        }
+
+        &--selected:not(.DayPicker-Day--disabled):not(.DayPicker-Day--outside) {
+            background-color: #007DFF;
+
+            &:hover {
+                background-color: #0059FF;
+            }
+        }
+    }
+}

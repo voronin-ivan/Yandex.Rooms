@@ -4,6 +4,7 @@ import Date from 'components/Date';
 import Rooms from 'components/Rooms';
 import Time from 'components/Time';
 import Chart from 'components/Chart';
+import Form from 'components/Form';
 
 import './style.scss';
 
@@ -23,6 +24,7 @@ export default class App extends Component {
                         <Time/>
                         <Chart/>
                     </section>
+                    <Form/>
                 </main>
             </div>
         );

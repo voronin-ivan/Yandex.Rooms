@@ -93,15 +93,31 @@
 
         .DayPicker-Caption {
             margin-bottom: 0;
-        }
 
-        .DayPicker-Caption > div {
-            font-size: 18px;
+            > div {
+                font-size: 18px;
+            }
         }
 
         .DayPicker-Day {
             padding: 6px;
             font-size: 15px;
+
+            &--today {
+                color: #ff0400;
+            }
+
+            &--disabled {
+                pointer-events: none;
+            }
+
+            &--selected:not(.DayPicker-Day--disabled):not(.DayPicker-Day--outside) {
+                background-color: #007DFF;
+
+                &:hover {
+                    background-color: #0059FF;
+                }
+            }
         }
     }
 }

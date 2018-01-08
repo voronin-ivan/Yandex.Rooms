@@ -1,0 +1,514 @@
+@import '../mixins';
+
+.form {
+    position: absolute;
+    z-index: 10;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 30px 0 0;
+    border-bottom: 1px solid #E9ECEF;
+    background-color: #fff;
+
+    @include mobile {
+        padding: 25px 0 0;
+    }
+
+    &__container {
+        width: 90%;
+        max-width: 904px;
+        margin: 0 auto;
+        padding-bottom: 232px;
+
+        @include mobile {
+            width: 100%;
+        }
+    }
+
+    &__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 19px;
+        padding: 0 16px;
+
+        @include mobile {
+            margin-bottom: 15px;
+        }
+    }
+
+    &__header-title {
+        font-weight: bold;
+        font-size: 20px;
+    }
+
+    &__header-icon {
+        padding-top: 2px;
+
+        @include mobile {
+            display: none;
+        }
+    }
+
+    &__row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+
+        @include mobile {
+            margin-bottom: 16px;
+            padding-bottom: 3px;
+            border-bottom: 8px solid #E9ECEF;
+        }
+
+        &:last-child {
+
+            @include mobile {
+                margin-bottom: 0;
+            }
+        }
+    }
+
+    &__row-block {
+        position: relative;
+        width: 420px;
+        margin: 0 16px 25px;
+
+        @include mobile {
+            width: 100%;
+            margin-bottom: 16px;
+        }
+
+        &--date {
+            display: flex;
+            justify-content: space-between;
+
+            @include mobile {
+                flex-direction: column;
+            }
+        }
+
+        &--members {
+
+            @include mobile {
+                margin: 0 0 16px;
+                padding: 0 16px 13px;
+                border-bottom: 8px solid #E9ECEF;
+            }
+        }
+    }
+
+    &__label,
+    &__rooms-title {
+        display: inline-block;
+        vertical-align: top;
+        margin-bottom: 3px;
+        font-weight: bold;
+        font-size: 13px;
+    }
+
+    &__label-mobile {
+        display: none;
+        vertical-align: top;
+
+        @include mobile {
+            display: inline-block;
+        }
+    }
+
+    &__label--time {
+
+        @include mobile {
+            display: none;
+        }
+    }
+
+    &__input {
+        display: block;
+        width: 100%;
+        height: 38px;
+        padding: 0 9px;
+        letter-spacing: 0.4px;
+        font-size: 13px;
+        border-radius: 4px;
+        border: 2px solid #E9ECEF;
+        appearance: none;
+
+        @include mobile {
+            height: 44px;
+            letter-spacing: 1px;
+        }
+
+        &--medium {
+            width: 238px;
+
+            @include mobile {
+                width: 100%;
+            }
+        }
+
+        &--small {
+            width: 72px;
+
+            @include mobile {
+                width: 100%;
+            }
+        }
+
+        &--with-icon {
+            padding-right: 32px;
+        }
+
+        &--select {
+            color : transparent;
+            text-shadow : 0 0 0 #000; //hide blinking cursor
+            cursor: pointer;
+        }
+
+        &--focus,
+        &:hover,
+        &:focus {
+            outline: none;
+            border-color: #007DFF;
+        }
+
+        &::-webkit-input-placeholder {
+            color: #858E98;
+        }
+
+        &::-moz-placeholder {
+            color: #858E98;
+        }
+    }
+
+    &__input-icon {
+        position: absolute;
+        bottom: 10px;
+        right: 13px;
+        pointer-events: none;
+
+        @include mobile {
+            bottom: 15px;
+        }
+
+        &--remove {
+            cursor: pointer;
+            pointer-events: auto;
+        }
+
+        &--remove:hover,
+        &--remove:focus,
+        &--remove:active {
+
+            .icon-fill {
+                fill: #000;
+            }
+        }
+    }
+
+    &__date-wrapper {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+
+        @include mobile {
+            margin-bottom: 10px;
+        }
+    }
+
+    &__time-wrapper {
+        display: flex;
+        align-items: center;
+
+        @include mobile {
+            justify-content: center;
+        }
+    }
+
+    &__time-separator {
+        margin: 20px 4px 0;
+        font-weight: bold;
+        font-size: 13px;
+        line-height: 15px;
+
+        @include mobile {
+            margin: 0 5px 0;
+        }
+    }
+
+    &__select {
+        position: absolute;
+        z-index: 1;
+        top: 57px;
+        left: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        overflow: auto;
+        width: 100%;
+        min-height: 34px;
+        max-height: 136px;
+        font-size: 14px;
+        border-radius: 4px;
+        background-color: #fff;
+        box-shadow: 0 1px 10px 0 rgba(0, 44, 92, 0.28);
+
+        @include mobile {
+            top: 63px;
+            left: 16px;
+            width: calc(100% - 32px);
+        }
+    }
+
+    &__select-option {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        height: 34px;
+        padding: 0 16px;
+        font-size: 13px;
+        cursor: pointer;
+
+        &:hover,
+        &:focus,
+        &:active {
+            font-weight: bold;
+            background-color: #F6F7F9;
+        }
+    }
+
+    &__option-img {
+        display: block;
+        width: 24px;
+        height: 24px;
+        margin-right: 8px;
+        border-radius: 100%;
+
+        &--empty {
+            background: url('user.svg') no-repeat center;
+            background-size: cover;
+        }
+    }
+
+    &__option-floor {
+        margin-left: 5px;
+        color: #858E98;
+    }
+
+    &__members {
+        display: flex;
+        flex-wrap: wrap;
+        margin-top: 13px;
+
+        @include mobile {
+            flex-direction: column;
+            margin-top: 10px;
+        }
+    }
+
+    &__member {
+        display: flex;
+        align-items: center;
+        height: 24px;
+        margin-right: 7px;
+        margin-bottom: 8px;
+        padding-right: 12px;
+        font-size: 13px;
+        border-radius: 16px;
+        background-color: #E9ECEF;
+
+        @include mobile {
+            position: relative;
+            height: 32px;
+            margin-right: 0;
+            padding-right: 40px;
+            font-size: 15px;
+            line-height: 18px;
+        }
+    }
+
+    &__member-photo {
+        display: block;
+        width: 24px;
+        height: 24px;
+        margin-right: 8px;
+        border-radius: 100%;
+
+        @include mobile {
+            width: 32px;
+            height: 32px;
+        }
+    }
+
+    &__member-remove {
+        margin-left: 16px;
+        cursor: pointer;
+
+        @include mobile {
+            position: absolute;
+            top: 9px;
+            right: 15px;
+            width: 14px;
+            height: 14px;
+        }
+
+        &:hover,
+        &:focus,
+        &:active {
+
+            .icon-fill {
+                fill: #000;
+            }
+        }
+    }
+
+    &__rooms-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        height: 38px;
+        margin-bottom: 8px;
+        padding-left: 10px;
+        padding-right: 15px;
+        font-size: 13px;
+        line-height: 17px;
+        border-radius: 4px;
+        background-color: #E9ECEF;
+        cursor: pointer;
+
+        @include mobile {
+            height: 44px;
+            padding-left: 13px;
+            padding-right: 13px;
+            font-size: 15px;
+        }
+
+        &:hover {
+            color: #fff;
+            background-color: #007DFF;
+        }
+
+        &:last-child {
+
+            @include mobile {
+                margin-bottom: 0;
+            }
+        }
+
+        &--choosed {
+            color: #fff;
+            background-color: #007DFF;
+            cursor: default;
+        }
+    }
+
+    &__room-wrapper {
+        display: flex;
+        align-items: center;
+    }
+
+    &__room-time {
+        flex-shrink: 0;
+        margin-right: 17px;
+        font-weight: 500;
+
+        @include mobile {
+            margin-right: 13px;
+        }
+    }
+
+    &__room-delete {
+        cursor: pointer;
+
+        @include mobile {
+            width: 14px;
+            height: 14px;
+        }
+
+        .icon__svg-fill {
+            fill: #fff;
+        }
+    }
+
+    &__date-picker {
+        top: 57px;
+        width: 100%;
+        border-radius: 4px;
+        background-color: #fff;
+        box-shadow: 0 1px 10px 0 rgba(0, 44, 92, 0.28);
+    }
+
+    &__buttons {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        padding: 20px 0;
+        border-top: 1px solid #E9ECEF;
+
+        @include mobile {
+            padding: 0 0 18px;
+        }
+    }
+
+    &__buttons-item {
+        margin: 0 8px;
+
+        @include mobile {
+            order: 1;
+            height: 44px;
+            padding: 0 25px;
+            font-size: 15px;
+
+            &--delete {
+                order: 0;
+                width: 100%;
+                height: 60px;
+                margin: 0 0 18px;
+                color: #FF3333;
+                border-radius: 0;
+                border-bottom: 8px solid #E9ECEF;
+                background-color: #fff;
+            }
+
+            &--save {
+                color: #fff;
+                background-color: #007DFF;
+            }
+
+            &--save:hover {
+                color: #fff;
+                background-color: #0059FF;
+            }
+
+            &--save:focus,
+            &--save:active {
+                color: #fff;
+                background-color: #3C33FF;
+            }
+
+            &--cancel {
+                margin: 15px 0 120px;
+            }
+
+            &--create {
+                width: 238px;
+            }
+        }
+    }
+
+    // show scrollbar on members-list always on macOS
+    ::-webkit-scrollbar {
+            -webkit-appearance: none;
+            width: 7px;
+        }
+
+    ::-webkit-scrollbar-thumb {
+        border-radius: 4px;
+        background-color: rgba(0, 0, 0, 0.5);
+        -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
+    }
+}

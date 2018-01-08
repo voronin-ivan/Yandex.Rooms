@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import InlineSVG from 'svg-inline-react';
-import DayPicker from 'react-day-picker';
-import MomentLocaleUtils from 'react-day-picker/moment';
+import moment from 'moment';
 import ActionCreators from 'actions/ActionCreators';
 import { months } from 'core/utils';
 import Button from 'components/Button';
+import DatePicker from 'components/DatePicker';
 
 import './style.scss';
 import 'react-day-picker/lib/style.css';
@@ -27,17 +27,13 @@ export default class View extends Component {
     }
 
     _getDate = () => {
-        const day = this.props.date.getDate();
-        const month = this.props.date.getMonth();
-        const year = this.props.date.getFullYear();
-        const currentDate = new Date();
-        const currentDay = currentDate.getDate();
-        const currentMonth = currentDate.getMonth();
-        const currentYear = currentDate.getFullYear();
+        const date = this.props.date;
+        const day = date.getDate();
+        const month = date.getMonth();
 
         let monthName = months[month];
 
-        if (day === currentDay && month === currentMonth && year === currentYear) {
+        if (moment(this.props.date).isSame(new Date(), 'day')) {
             monthName = `${monthName.substr(0, 3)} · Сегодня`;
         }
 
@@ -45,22 +41,43 @@ export default class View extends Component {
     }
 
     _reduceDate = () => {
-        const newDate = new Date(this.props.date.valueOf() - 86400000);
-        const currentDate = new Date().valueOf();
+        const newDate = moment(this.props.date).subtract(1, 'days').toDate();
+        const minDate = moment().subtract(1.5, 'months').toDate();
 
-        ActionCreators.setDate(newDate);
+        if (!moment(newDate).isBefore(minDate, 'day')) {
+            ActionCreators.setDate(newDate);
+        }
     }
 
     _increaseDate = () => {
-        const newDate = new Date(this.props.date.valueOf() + 86400000);
+        const newDate = moment(this.props.date).add(1, 'days').toDate();
+        const minDate = moment().add(1.5, 'months').toDate();
 
-        ActionCreators.setDate(newDate);
+        if (!moment(newDate).isAfter(minDate, 'day')) {
+            ActionCreators.setDate(newDate);
+        }
+    }
+
+    _setNewDate = (date) => {
+        const currenDate = new Date();
+
+        if (moment(date).isSame(currenDate, 'day')) {
+            date = moment(date).set({
+                'hour': currenDate.getHours(),
+                'minute': currenDate.getMinutes()
+            }).toDate();
+        }
+
+        ActionCreators.setDate(date);
+        this.setState({showDatePicker: false});
     }
 
     render() {
         const date = this._getDate();
         const datePicker = this.state.showDatePicker ? (
-            <DayPicker className="date__picker" localeUtils={MomentLocaleUtils} locale="ru"/>
+            <DatePicker className="date__picker"
+                        date={this.props.date}
+                        onDayClick={this._setNewDate} />
         ) : null;
 
         return (
