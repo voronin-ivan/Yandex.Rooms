@@ -11,7 +11,7 @@ module.exports = {
     devServer: {
         port: 8000,
         proxy: {
-            '/api': 'http://localhost:3000'
+            '/graphql': 'http://localhost:3000/graphql'
         }
     },
     devtool: 'eval-source-map',

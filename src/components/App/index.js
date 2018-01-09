@@ -1,32 +1,25 @@
 import React, { Component } from 'react';
-import Header from 'components/Header';
-import Date from 'components/Date';
-import Rooms from 'components/Rooms';
-import Time from 'components/Time';
-import Chart from 'components/Chart';
-import Form from 'components/Form';
+import UIStore from 'stores/UIStore';
+import { Container } from 'flux/utils';
+import View from './View';
 
-import './style.scss';
+class App extends Component {
 
-export default class App extends Component {
+    static getStores() {
+        return [UIStore];
+    }
+
+    static calculateState(prevState) {
+        const UIStoreState = UIStore.getState();
+
+        return {
+            show_form: UIStoreState.get('show_form')
+        }
+    }
 
     render() {
-
-        return (
-            <div className="container">
-                <Header/>
-                <main className="wrapper">
-                    <section className="left-col">
-                        <Date/>
-                        <Rooms/>
-                    </section>
-                    <section className="right-col">
-                        <Time/>
-                        <Chart/>
-                    </section>
-                    <Form/>
-                </main>
-            </div>
-        );
+        return <View {...this.state}/>;
     }
 }
+
+export default Container.create(App);

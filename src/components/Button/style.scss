@@ -70,4 +70,16 @@
         }
     }
 
+    &--disabled {
+        color: #ccc;
+        background-color: #E9ECEF;
+        cursor: not-allowed;
+
+        &:hover,
+        &:focus,
+        &:active {
+            color: #ccc;
+            background-color: #E9ECEF;
+        }
+    }
 }

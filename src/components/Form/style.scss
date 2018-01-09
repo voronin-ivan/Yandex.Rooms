@@ -17,9 +17,9 @@
 
     &__container {
         width: 90%;
-        max-width: 904px;
+        max-width: 905px;
+        min-height: 515px;
         margin: 0 auto;
-        padding-bottom: 232px;
 
         @include mobile {
             width: 100%;
@@ -82,6 +82,7 @@
 
         &--date {
             display: flex;
+            align-items: flex-start;
             justify-content: space-between;
 
             @include mobile {
@@ -184,7 +185,7 @@
 
     &__input-icon {
         position: absolute;
-        bottom: 10px;
+        top: 29px;
         right: 13px;
         pointer-events: none;
 
@@ -220,7 +221,9 @@
 
     &__time-wrapper {
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
+        width: 165px;
 
         @include mobile {
             justify-content: center;
@@ -251,7 +254,7 @@
         width: 100%;
         min-height: 34px;
         max-height: 136px;
-        font-size: 14px;
+        font-size: 13px;
         border-radius: 4px;
         background-color: #fff;
         box-shadow: 0 1px 10px 0 rgba(0, 44, 92, 0.28);
@@ -498,6 +501,15 @@
                 width: 238px;
             }
         }
+    }
+
+    &__error {
+        width: 100%;
+        margin-top: 5px;
+        font-style: italic;
+        font-size: 13px;
+        line-height: 15px;
+        color: #ff0400;
     }
 
     // show scrollbar on members-list always on macOS

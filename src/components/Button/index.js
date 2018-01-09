@@ -10,7 +10,8 @@ export default class Button extends Component {
         color: PropTypes.string,
         className: PropTypes.string,
         onClick: PropTypes.func,
-        isIcon: PropTypes.bool
+        isIcon: PropTypes.bool,
+        disabled: PropTypes.bool
     }
 
     static defaultProps = {
@@ -22,6 +23,7 @@ export default class Button extends Component {
             this.props.className,
             'button',
             {'button--icon': this.props.isIcon},
+            {'button--disabled': this.props.disabled},
             this.props.color ? `button--${this.props.color}` : ''
         );
 
