@@ -25,6 +25,24 @@ const actionCreators = {
             type: Actions.SET_EVENT_FOR_EDIT,
             payload: { event_for_edit }
         });
+    },
+    setRoom(room) {
+        Dispatcher.dispatch({
+            type: Actions.SET_ROOM,
+            payload: { room }
+        });
+    },
+    setTimeStart(time_start) {
+        Dispatcher.dispatch({
+            type: Actions.SET_TIME_START,
+            payload: { time_start }
+        });
+    },
+    setTimeEnd(time_end) {
+        Dispatcher.dispatch({
+            type: Actions.SET_TIME_END,
+            payload: { time_end }
+        });
     }
 };
 

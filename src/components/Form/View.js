@@ -17,13 +17,17 @@ export default class View extends Component {
     static propTypes = {
         users: PropTypes.array,
         rooms: PropTypes.array,
-        event_for_edit: PropTypes.number
+        date: PropTypes.instanceOf(Date),
+        event_for_edit: PropTypes.number,
+        room: PropTypes.number,
+        time_start: PropTypes.string,
+        time_end: PropTypes.string
     }
 
     state = {
         showDatePicker: false,
         showMemberList: false,
-        showAlertModal: true,
+        showAlertModal: false,
         showConfirmModal: false,
         theme: '',
         themeError: '',
@@ -40,6 +44,21 @@ export default class View extends Component {
 
     componentWillMount = () => {
         moment.locale('ru');
+        console.log(this.props);
+
+        if (this.props.room) {
+            this.setState({date: this.props.date});
+            this.setState({timeStart: this.props.time_start});
+            this.setState({timeEnd: this.props.time_end});
+            this.setState({room: this.props.room});
+        }
+    }
+
+    componentWillUnmount = () => {
+        ActionCreators.setEventForEdit(null);
+        ActionCreators.setRoom(null);
+        ActionCreators.setTimeStart('');
+        ActionCreators.setTimeEnd('');
     }
 
     _showDatePicker = () => {
@@ -132,7 +151,7 @@ export default class View extends Component {
             this.setState({ themeError: 'Тема не может содержать менее 4х символов'});
         }
 
-        if (members.length < 3) {
+        if (members.length < 2) {
             isFormValid = false;
             this.setState({ membersError: 'Для встречи необходимо минимум 2 участника'});
         }
@@ -179,6 +198,7 @@ export default class View extends Component {
         }
 
         addEvent(theme, dateStart, dateEnd, room, members);
+        this.setState({ showAlertModal: true });
     }
 
     _closeForm = () => {
@@ -236,6 +256,7 @@ export default class View extends Component {
                 <input id="date"
                        className={inputClassNames}
                        value={inputValue}
+                       onChange={this._changeDate}
                        onFocus={this._showDatePicker}
                        placeholder='Выберите дату'/>
                 {datePicker}

@@ -113,6 +113,7 @@
         width: 66px;
         height: 100%;
         background-color: #D5DFE9;
+        cursor: pointer;
 
         &:hover {
             background-color: #98A9B9;
@@ -123,7 +124,7 @@
             background-color: #8594a2;
         }
 
-        &--empty {
+        &--free {
             background-color: #fff;
 
             &:hover {
@@ -168,16 +169,8 @@
             }
         }
 
-        &--small {
-            width: 56px;
-        }
-
-        &--medium {
-            width: 76px;
-        }
-
-        &--big {
-            width: 132px;
+        &--disabled {
+            pointer-events: none;
         }
 
         &--active {

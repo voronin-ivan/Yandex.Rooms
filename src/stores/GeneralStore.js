@@ -1,9 +1,9 @@
-import MyReduceStore from 'core/MyReduceStore';
+import { ReduceStore } from 'flux/utils';
 import Dispatcher from 'core/Dispatcher';
 import Actions from 'constants/Actions';
 import { Map } from 'immutable';
 
-class GeneralStore extends MyReduceStore {
+class GeneralStore extends ReduceStore {
     getInitialState() {
         return Map({});
     }

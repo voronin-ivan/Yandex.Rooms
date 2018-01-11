@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import GeneralStore from 'stores/GeneralStore';
 import UIStore from 'stores/UIStore';
 import { Container } from 'flux/utils';
 import View from './View';
@@ -6,13 +7,16 @@ import View from './View';
 class Chart extends Component {
 
     static getStores() {
-        return [UIStore];
+        return [GeneralStore, UIStore];
     }
 
     static calculateState(prevState) {
+        const GeneralStoreState = GeneralStore.getState();
         const UIStoreState = UIStore.getState();
 
         return {
+            rooms: GeneralStoreState.get('rooms'),
+            events: GeneralStoreState.get('events'),
             date: UIStoreState.get('date')
         }
     }

@@ -1,12 +1,16 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
+import Cell from 'components/Cell';
+import { minuteWidth } from 'core/utils';
 
 import './style.scss';
 
 export default class View extends Component {
 
     static propTypes = {
+        events: PropTypes.array,
+        rooms: PropTypes.array,
         date: PropTypes.instanceOf(Date)
     }
 
@@ -15,9 +19,9 @@ export default class View extends Component {
 
         for (let i = 0; i < 24; i++) {
             const date = this.props.date;
-            const firstCondition = moment(date).isSame(new Date(), 'day');
+            const firstCondition = moment().isSame(date, 'day');
             const secondCondition = date.getHours() === i;
-            const position = date.getMinutes() * 1.1; // bc 1 minute === 1.1px (layout)
+            const position = date.getMinutes() * minuteWidth;
             const currentTimeBlock = (
                 <div className="chart__item-time" style={{left: `${position}px`}}>
                     <div className="chart__item-current">{moment(date).format('HH:mm')}</div>
@@ -34,14 +38,147 @@ export default class View extends Component {
         return lines;
     }
 
+    _renderCells = (time, events, roomId, createdCells) => {
+        const cells = createdCells ? createdCells : [];
+
+        if (time === 1440) { // === 00:00
+            return cells;
+        }
+
+        if (events.length === 0) {
+            const cellsCount = Math.floor((1440 - time) / 60);
+            const hourRest = time % 60;
+
+            if (hourRest!== 0) {
+                const eventDuration = 60 - hourRest;
+
+                cells.push(
+                    <Cell isFree={true}
+                          room={roomId}
+                          timeStart={time}
+                          duration={eventDuration}/>
+                );
+
+                time += eventDuration;
+            }
+
+            for (let i = 0; i < cellsCount; i++) {
+                cells.push(
+                    <Cell isFree={true}
+                          room={roomId}
+                          timeStart={time}
+                          duration={60}/>
+                );
+
+                time += 60;
+            }
+        } else {
+            const event = events[events.length - 1];
+            const dateStart = moment(event.dateStart).toDate();
+            const dateEnd = moment(event.dateEnd).toDate();
+            const eventStart = moment(dateStart).hour() * 60 + moment(dateStart).minutes();
+            const eventEnd = moment(dateEnd).hour() * 60 + moment(dateStart).minutes();
+            const eventDuration = eventEnd - eventStart;
+            const beforeStartFromHour = eventStart % 60;
+            const beforeEventHour = eventStart - beforeStartFromHour - time;
+
+            if (beforeEventHour > 0) {
+                const freeCellsCount = Math.floor(beforeEventHour / 60);
+
+                if (beforeEventHour % 60 !== 0) {
+                    cells.push(
+                        <Cell isFree={true}
+                              room={roomId}
+                              timeStart={time}
+                              duration={beforeEventHour % 60}/>
+                    );
+
+                    time += beforeEventHour % 60;
+                }
+
+                for (let i = 0; i < freeCellsCount; i++) {
+                    cells.push(
+                        <Cell isFree={true}
+                              room={roomId}
+                              timeStart={time}
+                              duration={60}/>
+                    );
+
+                    time += 60;
+                }
+            }
+
+            if (beforeStartFromHour) {
+                cells.push(
+                    <Cell isFree={true}
+                          room={roomId}
+                          timeStart={time}
+                          duration={beforeStartFromHour}/>
+                );
+
+                time += beforeStartFromHour;
+            }
+
+            cells.push(
+                <Cell duration={eventDuration}/>
+            );
+
+            time += eventDuration;
+            events = events.filter(item => {
+                return item.id !== event.id;
+            });
+        }
+
+        return this._renderCells(time, events, roomId, cells);
+    }
+
+    _renderEvents = () => {
+        const rooms = this.props.rooms.sort((a, b) => a.floor - b.floor);
+        const floors = [];
+        const events = this.props.events.filter(event => {
+            return moment(this.props.date).isSame(event.dateStart, 'day');
+        });
+        const eventsBlocks = [];
+
+        rooms.forEach(room => {
+            if (floors[floors.length - 1] !== room.floor) {
+                floors.push(room.floor);
+            }
+        });
+
+        for (let i = 0; i < floors.length; i++) {
+            const roomsOnFloor = rooms.filter(room => room.floor === floors[i]);
+            const rows = [];
+
+            roomsOnFloor.forEach(room => {
+                const roomEvents = events.filter(event => event.room.id === room.id);
+                const cells = this._renderCells(0, roomEvents, +room.id);
+
+                rows.push(
+                    <div className="chart__row">
+                        {cells}
+                    </div>
+                );
+            });
+
+            eventsBlocks.push(
+                <div>{rows}</div>
+            );
+        }
+
+        return eventsBlocks;
+    }
+
     render() {
         const lines = this._renderLines();
+        const events = this._renderEvents();
 
         return (
             <div className="chart">
                 <div className="chart__lines">
                     {lines}
                 </div>
+                {events}
             </div>
         );
     }

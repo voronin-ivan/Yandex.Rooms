@@ -12,3 +12,5 @@ export const months = [
     'ноября',
     'декабря'
 ];
+
+export const minuteWidth = 1.1; // bc 1 minute == 1.1px (layout)

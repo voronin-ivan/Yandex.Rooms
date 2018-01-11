@@ -17,7 +17,11 @@ class Form extends Component {
         return {
             users: GeneralStoreState.get('users'),
             rooms: GeneralStoreState.get('rooms'),
-            event_for_edit: UIStoreState.get('event_for_edit')
+            event_for_edit: UIStoreState.get('event_for_edit'),
+            date: UIStoreState.get('date'),
+            time_start: UIStoreState.get('time_start'),
+            time_end: UIStoreState.get('time_end'),
+            room: UIStoreState.get('room')
         }
     }
 
