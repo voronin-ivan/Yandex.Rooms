@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import Immutable from 'immutable';
 import moment from 'moment';
 import Cell from 'components/Cell';
 import { minuteWidth } from 'core/utils';
@@ -9,9 +10,32 @@ import './style.scss';
 export default class View extends Component {
 
     static propTypes = {
-        events: PropTypes.array,
+        users: PropTypes.array,
+        events: PropTypes.instanceOf(Immutable.List),
         rooms: PropTypes.array,
         date: PropTypes.instanceOf(Date)
+    }
+
+    _isPastTime = (minutes) => {
+        const hour = Math.floor(minutes / 60);
+        const minute = minutes % 60;
+        const time = moment(this.props.date).set({
+            'hour': hour,
+            'minute': minute
+        }).toDate();
+        const currentTime = moment();
+
+        let result = false;
+
+        if (currentTime.isAfter(time, 'hour')) {
+            result = true;
+        }
+
+        if (currentTime.isSame(time, 'hour') && currentTime.minute() > 45) {
+            result = true;
+        }
+
+        return result;
     }
 
     _renderLines = () => {
@@ -54,9 +78,10 @@ export default class View extends Component {
 
                 cells.push(
                     <Cell isFree={true}
-                          room={roomId}
+                          roomId={roomId}
                           timeStart={time}
-                          duration={eventDuration}/>
+                          duration={eventDuration}
+                          disabled={this._isPastTime(time)}/>
                 );
 
                 time += eventDuration;
@@ -65,9 +90,10 @@ export default class View extends Component {
             for (let i = 0; i < cellsCount; i++) {
                 cells.push(
                     <Cell isFree={true}
-                          room={roomId}
+                          roomId={roomId}
                           timeStart={time}
-                          duration={60}/>
+                          duration={60}
+                          disabled={this._isPastTime(time)}/>
                 );
 
                 time += 60;
@@ -77,7 +103,7 @@ export default class View extends Component {
             const dateStart = moment(event.dateStart).toDate();
             const dateEnd = moment(event.dateEnd).toDate();
             const eventStart = moment(dateStart).hour() * 60 + moment(dateStart).minutes();
-            const eventEnd = moment(dateEnd).hour() * 60 + moment(dateStart).minutes();
+            const eventEnd = moment(dateEnd).hour() * 60 + moment(dateEnd).minutes();
             const eventDuration = eventEnd - eventStart;
             const beforeStartFromHour = eventStart % 60;
             const beforeEventHour = eventStart - beforeStartFromHour - time;
@@ -88,9 +114,10 @@ export default class View extends Component {
                 if (beforeEventHour % 60 !== 0) {
                     cells.push(
                         <Cell isFree={true}
-                              room={roomId}
+                              roomId={roomId}
                               timeStart={time}
-                              duration={beforeEventHour % 60}/>
+                              duration={beforeEventHour % 60}
+                              disabled={this._isPastTime(time)}/>
                     );
 
                     time += beforeEventHour % 60;
@@ -99,9 +126,10 @@ export default class View extends Component {
                 for (let i = 0; i < freeCellsCount; i++) {
                     cells.push(
                         <Cell isFree={true}
-                              room={roomId}
+                              roomId={roomId}
                               timeStart={time}
-                              duration={60}/>
+                              duration={60}
+                              disabled={this._isPastTime(time)}/>
                     );
 
                     time += 60;
@@ -111,16 +139,43 @@ export default class View extends Component {
             if (beforeStartFromHour) {
                 cells.push(
                     <Cell isFree={true}
-                          room={roomId}
+                          roomId={roomId}
                           timeStart={time}
-                          duration={beforeStartFromHour}/>
+                          duration={beforeStartFromHour}
+                          disabled={this._isPastTime(time)}/>
                 );
 
                 time += beforeStartFromHour;
             }
+            // hasBorder: PropTypes.bool
+
+            let roomTitle = null;
+
+            this.props.rooms.forEach(room => {
+                if (room.id === String(roomId)) {
+                    roomTitle = room.title;
+                }
+            });
+
+            const members = this.props.users.filter(user => {
+                for (let i = 0; i < event.users.length; i++) {
+                    if (event.users[i].id === user.id) {
+                        return true;
+                    }
+                }
+
+                return false;
+            });
 
             cells.push(
-                <Cell duration={eventDuration}/>
+                <Cell eventId={event.id}
+                      eventTitle={event.title}
+                      eventStart={dateStart}
+                      eventEnd={dateEnd}
+                      eventMembers={members}
+                      eventRoom={roomTitle}
+                      duration={eventDuration}
+                      hasBorder={false}/>
             );
 
             time += eventDuration;
@@ -135,10 +190,12 @@ export default class View extends Component {
     _renderEvents = () => {
         const rooms = this.props.rooms.sort((a, b) => a.floor - b.floor);
         const floors = [];
-        const events = this.props.events.filter(event => {
+        const events = this.props.events.toJS().filter(event => {
             return moment(this.props.date).isSame(event.dateStart, 'day');
         });
         const eventsBlocks = [];
+
+        console.log(events);
 
         rooms.forEach(room => {
             if (floors[floors.length - 1] !== room.floor) {
@@ -152,6 +209,11 @@ export default class View extends Component {
 
             roomsOnFloor.forEach(room => {
                 const roomEvents = events.filter(event => event.room.id === room.id);
+
+                roomEvents.sort((a, b) => {
+                    return moment(a.dateStart).isBefore(b.dateStart) ? 1 : -1;
+                });
+
                 const cells = this._renderCells(0, roomEvents, +room.id);
 
                 rows.push(

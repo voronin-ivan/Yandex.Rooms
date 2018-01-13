@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import ActionCreators from 'actions/ActionCreators';
 import Header from 'components/Header';
 import Date from 'components/Date';
 import Rooms from 'components/Rooms';
@@ -16,7 +17,6 @@ export default class View extends Component {
     }
 
     render() {
-
         return (
             <div className="container">
                 <Header/>

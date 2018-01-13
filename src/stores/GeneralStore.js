@@ -12,6 +12,8 @@ class GeneralStore extends ReduceStore {
         switch (action.type) {
             case Actions.SET_GENERAL_STORE:
                 return Map(action.payload.result);
+            case Actions.SET_EVENTS:
+                return state.set('events', action.payload.events);
             default:
                 return state;
         }

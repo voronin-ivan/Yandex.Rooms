@@ -41,7 +41,7 @@ module.exports = {
                             loader: 'postcss-loader',
                             options: {
                                 plugins: function() {
-                                    return [autoprefixer('last 2 versions', 'ie 11', 'iOS 8')];
+                                    return [autoprefixer('last 2 versions', 'ie 10', 'iOS 8')];
                                 }
                             }
                         },

@@ -11,11 +11,24 @@ export default class Modal extends Component {
     static propTypes = {
         isAlert: PropTypes.bool,
         date: PropTypes.string,
-        timeStart: PropTypes.string,
-        timeEnd: PropTypes.string,
         room: PropTypes.string,
-        eventId: PropTypes.number
+        onConfirm: PropTypes.func,
+        onReject: PropTypes.func
     }
+
+    componentWillMount = () => {
+        document.addEventListener('keyup', this._handleKeyUp);
+    }
+
+    componentWillUnmount = () => {
+        document.removeEventListener('keyup', this._handleKeyUp);
+    }
+
+    _handleKeyUp = (event) => {
+        if (event.keyCode === 27) {
+            this.props.isAlert ? this._closeForm() : this.props.onReject();
+        }
+    };
 
     _closeForm = () => {
         ActionCreators.setShowForm(false);
@@ -35,9 +48,10 @@ export default class Modal extends Component {
                     <div className="modal__body-title">{title}</div>
                     {this.props.isAlert ? (
                         <div className="modal__body-message">
-                            <div>{`${this.props.date}, ${this.props.timeStart}—${this.props.timeEnd}`}</div>
-                        <div>{this.props.room}</div>
-                    </div>) : null}
+                            <div>{this.props.date}</div>
+                            <div>{this.props.room}</div>
+                        </div>
+                    ) : null}
                     {this.props.isAlert ? (
                         <div className="modal__body-buttons">
                             <Button className="modal__button"
@@ -46,8 +60,8 @@ export default class Modal extends Component {
                         </div>
                     ) : (
                         <div className="modal__body-buttons">
-                            <Button className="modal__button" onClick={this._addEvent}>Отмена</Button>
-                            <Button className="modal__button" onClick={this._closeForm}>Удалить</Button>
+                            <Button className="modal__button" onClick={this.props.onReject}>Отмена</Button>
+                            <Button className="modal__button" onClick={this.props.onConfirm}>Удалить</Button>
                         </div>
                     )}
                 </div>

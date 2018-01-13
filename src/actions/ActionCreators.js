@@ -8,6 +8,12 @@ const actionCreators = {
             payload: { result }
         });
     },
+    setEvents(events) {
+        Dispatcher.dispatch({
+            type: Actions.SET_EVENTS,
+            payload: { events }
+        });
+    },
     setDate(date) {
         Dispatcher.dispatch({
             type: Actions.SET_DATE,

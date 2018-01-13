@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import Immutable from 'immutable';
 import InlineSVG from 'svg-inline-react';
 import moment from 'moment';
 import classNames from 'classnames';
 import TimeField from 'react-simple-timefield';
-import { addEvent } from 'api';
+import { addEvent, removeEvent } from 'api';
 import ActionCreators from 'actions/ActionCreators';
 import Button from 'components/Button';
 import DatePicker from 'components/DatePicker';
@@ -17,8 +18,9 @@ export default class View extends Component {
     static propTypes = {
         users: PropTypes.array,
         rooms: PropTypes.array,
+        events: PropTypes.instanceOf(Immutable.List),
         date: PropTypes.instanceOf(Date),
-        event_for_edit: PropTypes.number,
+        event_for_edit: PropTypes.string,
         room: PropTypes.number,
         time_start: PropTypes.string,
         time_end: PropTypes.string
@@ -43,14 +45,36 @@ export default class View extends Component {
     }
 
     componentWillMount = () => {
+        console.log(this.props.events);
         moment.locale('ru');
-        console.log(this.props);
 
         if (this.props.room) {
             this.setState({date: this.props.date});
             this.setState({timeStart: this.props.time_start});
             this.setState({timeEnd: this.props.time_end});
             this.setState({room: this.props.room});
+        }
+
+        if (this.props.event_for_edit) {
+            this.props.events.toJS().forEach(event => {
+                if (event.id === this.props.event_for_edit) {
+                    const date = moment(event.dateStart).toDate();
+                    const timeStart = moment(event.dateStart).format('hh:mm');
+                    const timeEnd = moment(event.dateEnd).format('hh:mm');
+                    const members = [];
+
+                    event.users.forEach(user => {
+                        members.push(user.id);
+                    });
+
+                    this.setState({ theme: event.title });
+                    this.setState({ date });
+                    this.setState({ timeStart });
+                    this.setState({ timeEnd });
+                    this.setState({ members });
+                    this.setState({ room: event.room.id });
+                }
+            });
         }
     }
 
@@ -82,6 +106,12 @@ export default class View extends Component {
     _hideAllPickers = () => {
         this._hideDatePicker();
         this._hideMemberList();
+    }
+
+    _toggleConfirmModal = () => {
+        this.setState(prevState => {
+            return {showConfirmModal: !prevState.showConfirmModal}
+        });
     }
 
     _changeTheme = (event) => {
@@ -197,8 +227,44 @@ export default class View extends Component {
             return null;
         }
 
-        addEvent(theme, dateStart, dateEnd, room, members);
-        this.setState({ showAlertModal: true });
+        addEvent(theme, dateStart, dateEnd, room, members)
+            .then((data) => {
+                const users = [];
+
+                members.forEach(member => {
+                    users.push({
+                        id: member
+                    });
+                });
+
+                const event = {
+                    id: data.id,
+                    title: theme,
+                    users,
+                    dateStart,
+                    dateEnd,
+                    room: {
+                        id: String(room)
+                    }
+                };
+
+                const events = this.props.events.push(event);
+
+                ActionCreators.setEvents(events);
+                this.setState({ showAlertModal: true });
+            });
+    }
+
+    _removeEvent = () => {
+        const events = this.props.events.filterNot(event => {
+            return event.id === this.props.event_for_edit;
+        });
+
+        removeEvent(this.props.event_for_edit)
+            .then(() => {
+                ActionCreators.setEvents(events);
+            });
+        ActionCreators.setShowForm(false);
     }
 
     _closeForm = () => {
@@ -206,6 +272,7 @@ export default class View extends Component {
     }
 
     _renderThemeBlock = () => {
+        console.log(this.props.events);
         const error = this.state.themeError ? (
             <div className="form__error">{this.state.themeError}</div>
         ) : null;
@@ -399,28 +466,47 @@ export default class View extends Component {
         }
 
         return (
-            <div className="form__buttons">
-                <Button className="form__buttons-item" onClick={this._closeForm}>Отмена</Button>
-                <Button className="form__buttons-item"
-                        color="blue"
-                        onClick={this._addEvent}
-                        disabled={isButtonDisabled}>Создать встречу</Button>
-            </div>
+            this.props.event_for_edit ? (
+                <div className="form__buttons">
+                    <Button className="form__buttons-item" onClick={this._closeForm}>Отмена</Button>
+                    <Button className="form__buttons-item" onClick={this._toggleConfirmModal}>Удалить встречу</Button>
+                    <Button className="form__buttons-item"
+                            onClick={this._closeForm}
+                            disabled={isButtonDisabled}>Сохранить</Button>
+                </div>
+            ) : (
+                <div className="form__buttons">
+                    <Button className="form__buttons-item" onClick={this._closeForm}>Отмена</Button>
+                    <Button className="form__buttons-item"
+                            color="blue"
+                            onClick={this._addEvent}
+                            disabled={isButtonDisabled}>Создать встречу</Button>
+                </div>
+            )
         );
     }
 
     _renderAlertModal = () => {
-        const date = '14 декабря';
-        const room = 'Готем 4 этаж';
+        const date = `${moment(this.props.date).format('D MMMM')}, ${this.state.timeStart}—${this.state.timeEnd}`;
+        let roomInfo = null;
 
+        this.props.rooms.forEach(room => {
+            if (room.id == this.state.room) {
+                roomInfo = `${room.title} · ${room.floor} этаж`;
+            }
+        });
 
         return (
             <Modal isAlert={true}
-                   date='14 декабря'
-                   timeStart={this.state.timeStart}
-                   timeEnd={this.state.timeEnd}
-                   room='Готем · 4 этаж' />
-        )
+                   date={date}
+                   room={roomInfo} />
+        );
+    }
+
+    _renderConfirmModal = () => {
+        return (
+            <Modal onConfirm={this._removeEvent} onReject={this._toggleConfirmModal}/>
+        );
     }
 
     render() {
@@ -432,6 +518,7 @@ export default class View extends Component {
         const membersBlock = this._renderMembersBlock();
         const buttonsBlock = this._renderButtonsBlock();
         const alertModal = this._renderAlertModal();
+        const confirmModal = this.state.showConfirmModal ? this._renderConfirmModal() : null;
 
         if (this.state.showAlertModal) {
             return alertModal;
@@ -461,6 +548,7 @@ export default class View extends Component {
                     </div>
                 </div>
                 {buttonsBlock}
+                {confirmModal}
             </section>
         );
     }
