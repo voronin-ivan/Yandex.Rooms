@@ -33,7 +33,7 @@ export default class View extends Component {
 
         let monthName = months[month];
 
-        if (moment(this.props.date).isSame(new Date(), 'day')) {
+        if (moment().isSame(this.props.date, 'day')) {
             monthName = `${monthName.substr(0, 3)} · Сегодня`;
         }
 
@@ -69,7 +69,7 @@ export default class View extends Component {
         }
 
         ActionCreators.setDate(date);
-        this.setState({showDatePicker: false});
+        this.setState({ showDatePicker: false });
     }
 
     render() {
@@ -82,11 +82,15 @@ export default class View extends Component {
 
         return (
             <div className="date">
-                <Button className="date__icon date__icon--left" isIcon={true} onClick={this._reduceDate}>
+                <Button className="date__icon date__icon--left"
+                        isIcon={true}
+                        onClick={this._reduceDate}>
                     <InlineSVG src={require(`!svg-inline-loader?removeSVGTagAttrs=false!./arrow.svg`)} />
                 </Button>
                 <div className="date__info" onClick={this._toggleDatePicker}>{date}</div>
-                <Button className="date__icon date__icon--right" isIcon={true} onClick={this._increaseDate}>
+                <Button className="date__icon date__icon--right"
+                        isIcon={true}
+                        onClick={this._increaseDate}>
                     <InlineSVG src={require(`!svg-inline-loader?removeSVGTagAttrs=false!./arrow.svg`)} />
                 </Button>
                 {datePicker}

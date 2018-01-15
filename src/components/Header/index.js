@@ -9,7 +9,7 @@ class Header extends Component {
         return [UIStore];
     }
 
-    static calculateState(prevState) {
+    static calculateState() {
         const UIStoreState = UIStore.getState();
 
         return {

@@ -46,7 +46,6 @@ export default class View extends Component {
     }
 
     componentWillMount = () => {
-        console.log(this.props.users);
         moment.locale('ru');
 
         if (this.props.room) {
@@ -68,12 +67,14 @@ export default class View extends Component {
                         members.push(user.id);
                     });
 
-                    this.setState({ theme: event.title });
-                    this.setState({ date });
-                    this.setState({ timeStart });
-                    this.setState({ timeEnd });
-                    this.setState({ members });
-                    this.setState({ room: event.room.id });
+                    this.setState({
+                        theme: event.title,
+                        room: event.room.id,
+                        date,
+                        timeStart,
+                        timeEnd,
+                        members,
+                    });
                 }
             });
         }
@@ -89,6 +90,7 @@ export default class View extends Component {
         ActionCreators.setRoom(null);
         ActionCreators.setTimeStart('');
         ActionCreators.setTimeEnd('');
+
         document.removeEventListener('click', this._clickOutsideDate);
         document.removeEventListener('click', this._clickOutsideMembers);
     }
@@ -137,9 +139,11 @@ export default class View extends Component {
 
     _changeDate = (date) => {
         if (date !== this.state.date) {
-            this.setState({ date });
-            this.setState({ dateError: ''});
-            this.setState({ room: null });
+            this.setState({
+                date,
+                dateError: '',
+                room: null
+            });
         }
 
         this._toggleDatePicker();
@@ -147,17 +151,21 @@ export default class View extends Component {
 
     _changeTimeStart = (time) => {
         if (time !== this.state.timeStart) {
-            this.setState({ timeStart: time });
-            this.setState({ timeError: ''});
-            this.setState({ room: null });
+            this.setState({
+                timeStart: time,
+                timeError: '',
+                room: null
+            });
         }
     }
 
     _changeTimeEnd = (time) => {
         if (time !== this.state.timeEnd) {
-            this.setState({ timeEnd: time });
-            this.setState({ timeError: ''});
-            this.setState({ room: null });
+            this.setState({
+                timeEnd: time,
+                timeError: '',
+                room: null
+            });
         }
     }
 
@@ -165,9 +173,11 @@ export default class View extends Component {
         const members = this.state.members;
 
         members.push(id);
-        this.setState({ members });
-        this.setState({ membersError: '' });
-        this.setState({ room: null });
+        this.setState({
+            members,
+            membersError: '',
+            room: null
+        });
 
         if (members.length === this.props.users.length) {
             this._toggleMemberList();
@@ -177,13 +187,17 @@ export default class View extends Component {
     _removeMember = (id) => {
         const members = this.state.members.filter(member => member !== id);
 
-        this.setState({ members });
-        this.setState({ room: null });
+        this.setState({
+            members,
+            room: null
+        });
     }
 
     _addRoom = (roomId) => {
-        this.setState({ room: roomId });
-        this.setState({ roomError: ''});
+        this.setState({
+            room: roomId,
+            roomError: ''
+        });
     }
 
     _removeRoom = () => {
@@ -365,7 +379,6 @@ export default class View extends Component {
         )
     }
 
-    // bc DayPickerInput has bug with input focus...
     _renderDateBlock = () => {
         const date = this.state.date;
         const inputValue = date ? moment(date).format('LL') : '';
@@ -388,6 +401,7 @@ export default class View extends Component {
             <div className="form__error">{this.state.dateError}</div>
         ) : null;
 
+        // custom input bc DayPickerInput has bug whit focus...
         return (
             <div className="form__date-wrapper" ref={node => this.date = node}>
                 <label htmlFor="date" className="form__label">Дата</label>
@@ -569,7 +583,8 @@ export default class View extends Component {
             const db = {
                 users: this.props.users,
                 rooms: this.props.rooms,
-                events: this.props.events.toJS()
+                events: this.props.events.toJS(),
+                eventForEdit: this.props.event_for_edit
             };
             const recommendatations = getRecommendation(date, this.state.members, db);
 

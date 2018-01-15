@@ -10,7 +10,7 @@ class Form extends Component {
         return [GeneralStore, UIStore];
     }
 
-    static calculateState(prevState) {
+    static calculateState() {
         const GeneralStoreState = GeneralStore.getState();
         const UIStoreState = UIStore.getState();
 

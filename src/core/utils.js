@@ -19,6 +19,10 @@ export const months = [
 
 export default (date, members, db) => {
     const eventsOnThisDay = db.events.filter(event => {
+        if (db.eventForEdit) {
+            return moment(event.dateStart).isSame(date.day, 'day') && event.id !== db.eventForEdit;
+        }
+
         return moment(event.dateStart).isSame(date.day, 'day');
     });
     const timeStart = date.timeStart[0] * 60 + Number(date.timeStart[1]) - 1;

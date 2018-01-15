@@ -9,7 +9,7 @@ class Rooms extends Component {
         return [GeneralStore];
     }
 
-    static calculateState(prevState) {
+    static calculateState() {
         const GeneralStoreState = GeneralStore.getState();
 
         return {

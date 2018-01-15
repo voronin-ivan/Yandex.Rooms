@@ -16,28 +16,6 @@ export default class View extends Component {
         date: PropTypes.instanceOf(Date)
     }
 
-    _isPastTime = (minutes) => {
-        const hour = Math.floor(minutes / 60);
-        const minute = minutes % 60;
-        const time = moment(this.props.date).set({
-            'hour': hour,
-            'minute': minute
-        }).toDate();
-        const currentTime = moment();
-
-        let result = false;
-
-        if (currentTime.isAfter(time, 'hour')) {
-            result = true;
-        }
-
-        if (currentTime.isSame(time, 'hour') && currentTime.minute() > 45) {
-            result = true;
-        }
-
-        return result;
-    }
-
     _renderLines = () => {
         const lines = [];
 
@@ -60,175 +38,6 @@ export default class View extends Component {
         }
 
         return lines;
-    }
-
-    _renderCells = (time, events, roomId, createdCells) => {
-        const cells = createdCells ? createdCells : [];
-
-        if (time === 1440) { // === 00:00
-            return cells;
-        }
-
-        if (events.length === 0) {
-            const cellsCount = Math.floor((1440 - time) / 60);
-            const hourRest = time % 60;
-
-            if (hourRest!== 0) {
-                const eventDuration = 60 - hourRest;
-
-                cells.push(
-                    <Cell isFree={true}
-                          key={`cell-${time}-${roomId}`}
-                          roomId={roomId}
-                          timeStart={time}
-                          duration={eventDuration}
-                          disabled={this._isPastTime(time)}/>
-                );
-
-                time += eventDuration;
-            }
-
-            for (let i = 0; i < cellsCount; i++) {
-                cells.push(
-                    <Cell isFree={true}
-                          key={`cell-${time}-${roomId}`}
-                          roomId={roomId}
-                          timeStart={time}
-                          duration={60}
-                          disabled={this._isPastTime(time)}/>
-                );
-
-                time += 60;
-            }
-        } else {
-            const event = events[events.length - 1];
-            const dateStart = moment(event.dateStart).toDate();
-            const dateEnd = moment(event.dateEnd).toDate();
-            const eventStart = moment(dateStart).hour() * 60 + moment(dateStart).minutes();
-            const eventEnd = moment(dateEnd).hour() * 60 + moment(dateEnd).minutes();
-            const eventDuration = eventEnd - eventStart;
-            let beforeStartFromHour = 0;
-
-            /*
-                Для правильного вывода пограничных случаев, к примеру:
-                Одна встреча заканчивается в 22:45, а другая начинается в 23:05
-                (seems legit :D)
-            */
-            if (eventStart - time <= 20) {
-                beforeStartFromHour = eventStart - time;
-            } else {
-                beforeStartFromHour = eventStart % 60;
-            }
-
-            const beforeEventHour = eventStart - beforeStartFromHour - time;
-
-            if (beforeEventHour > 0) {
-                const freeCellsCount = Math.floor(beforeEventHour / 60);
-
-                if (beforeEventHour % 60 !== 0) {
-                    cells.push(
-                        <Cell isFree={true}
-                              key={`cell-${time}-${roomId}`}
-                              roomId={roomId}
-                              timeStart={time}
-                              duration={beforeEventHour % 60}
-                              disabled={this._isPastTime(time)}/>
-                    );
-
-                    time += beforeEventHour % 60;
-                }
-
-                for (let i = 0; i < freeCellsCount; i++) {
-                    cells.push(
-                        <Cell isFree={true}
-                              key={`cell-${time}-${roomId}`}
-                              roomId={roomId}
-                              timeStart={time}
-                              duration={60}
-                              disabled={this._isPastTime(time)}/>
-                    );
-
-                    time += 60;
-                }
-            }
-
-            if (beforeStartFromHour) {
-                cells.push(
-                    <Cell isFree={true}
-                          key={`cell-${time}-${roomId}`}
-                          roomId={roomId}
-                          timeStart={time}
-                          duration={beforeStartFromHour}
-                          disabled={this._isPastTime(time)}/>
-                );
-
-                time += beforeStartFromHour;
-            }
-
-            let roomTitle = null;
-            let hasBorder = false;
-
-            this.props.rooms.forEach(room => {
-                if (room.id === String(roomId)) {
-                    roomTitle = room.title;
-                }
-            });
-
-            if (events.length > 1) {
-                const nextEvent = events[events.length - 2];
-                let nextEventStart = moment(nextEvent.dateStart).toDate();
-
-                nextEventStart = moment(nextEventStart).hour() * 60 + moment(nextEventStart).minutes();
-
-                if (eventEnd === nextEventStart) {
-                    hasBorder = true;
-                }
-            }
-
-            const members = this.props.users.filter(user => {
-                for (let i = 0; i < event.users.length; i++) {
-                    if (event.users[i].id === user.id) {
-                        return true;
-                    }
-                }
-
-                return false;
-            });
-
-            let tooltipPosition = null;
-
-            if (time < 150) {
-                tooltipPosition = 'left';
-            } else if (time + eventDuration > 1350) {
-                tooltipPosition = 'right';
-            }
-
-            cells.push(
-                <Cell eventId={event.id}
-                      eventTitle={event.title}
-                      eventStart={dateStart}
-                      eventEnd={dateEnd}
-                      eventMembers={members}
-                      eventRoom={roomTitle}
-                      duration={eventDuration}
-                      disabled={this._isPastTime(time)}
-                      hasBorder={hasBorder}
-                      tooltipPosition={tooltipPosition}
-                      key={`cell-${time}-${roomId}`}/>
-            );
-
-            time += eventDuration;
-
-            if (time > 1440) {
-                time = 1440;
-            }
-
-            events = events.filter(item => {
-                return item.id !== event.id;
-            });
-        }
-
-        return this._renderCells(time, events, roomId, cells);
     }
 
     _renderEvents = () => {
@@ -271,6 +80,134 @@ export default class View extends Component {
         }
 
         return eventsBlocks;
+    }
+
+    _renderCells = (time, events, roomId, createdCells) => {
+        const cells = createdCells ? createdCells : [];
+
+        if (time === 1440) { // === 00:00
+            return cells;
+        }
+
+        if (events.length === 0) {
+            const cellsCount = Math.floor((1440 - time) / 60);
+            const hourRest = time % 60;
+
+            if (hourRest !== 0) {
+                const eventDuration = 60 - hourRest;
+
+                cells.push(
+                    <Cell key={`cell-${time}-${roomId}`}
+                          roomId={roomId}
+                          timeStart={time}
+                          duration={eventDuration}/>
+                );
+
+                time += eventDuration;
+            }
+
+            for (let i = 0; i < cellsCount; i++) {
+                cells.push(
+                    <Cell key={`cell-${time}-${roomId}`}
+                          roomId={roomId}
+                          timeStart={time}
+                          duration={60}/>
+                );
+
+                time += 60;
+            }
+        } else {
+            const event = events[events.length - 1];
+            const dateStart = moment(event.dateStart).toDate();
+            const dateEnd = moment(event.dateEnd).toDate();
+            const eventStart = moment(dateStart).hour() * 60 + moment(dateStart).minutes();
+            const eventEnd = moment(dateEnd).hour() * 60 + moment(dateEnd).minutes();
+            const eventDuration = eventEnd - eventStart;
+            let beforeStartFromHour = 0;
+
+            /*
+                Для правильного вывода пограничных случаев, к примеру:
+                Одна встреча заканчивается в 22:45, а другая начинается в 23:05
+                (seems legit :D)
+            */
+            if (eventStart - time <= 20) {
+                beforeStartFromHour = eventStart - time;
+            } else {
+                beforeStartFromHour = eventStart % 60;
+            }
+
+            const beforeEventHour = eventStart - beforeStartFromHour - time;
+
+            if (beforeEventHour > 0) {
+                const freeCellsCount = Math.floor(beforeEventHour / 60);
+
+                if (beforeEventHour % 60 !== 0) {
+                    cells.push(
+                        <Cell key={`cell-${time}-${roomId}`}
+                              roomId={roomId}
+                              timeStart={time}
+                              duration={beforeEventHour % 60}/>
+                    );
+
+                    time += beforeEventHour % 60;
+                }
+
+                for (let i = 0; i < freeCellsCount; i++) {
+                    cells.push(
+                        <Cell key={`cell-${time}-${roomId}`}
+                              roomId={roomId}
+                              timeStart={time}
+                              duration={60}/>
+                    );
+
+                    time += 60;
+                }
+            }
+
+            if (beforeStartFromHour) {
+                cells.push(
+                    <Cell key={`cell-${time}-${roomId}`}
+                          roomId={roomId}
+                          timeStart={time}
+                          duration={beforeStartFromHour}/>
+                );
+
+                time += beforeStartFromHour;
+            }
+
+            let hasBorder = false;
+
+            if (events.length > 1) {
+                const nextEvent = events[events.length - 2];
+                let nextEventStart = moment(nextEvent.dateStart).toDate();
+
+                nextEventStart = moment(nextEventStart).hour() * 60 + moment(nextEventStart).minutes();
+
+                if (eventEnd === nextEventStart) {
+                    hasBorder = true;
+                }
+            }
+
+            cells.push(
+                <Cell eventId={event.id}
+                      duration={eventDuration}
+                      hasBorder={hasBorder}
+                      timeStart={time}
+                      key={`cell-${time}-${roomId}`}/>
+            );
+
+            time += eventDuration;
+
+            if (time > 1440) {
+                time = 1440;
+            }
+
+            events = events.filter(item => {
+                return item.id !== event.id;
+            });
+        }
+
+        return this._renderCells(time, events, roomId, cells);
     }
 
     render() {

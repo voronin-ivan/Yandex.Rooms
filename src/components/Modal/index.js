@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import ActionCreators from 'actions/ActionCreators';
 import Button from 'components/Button';
 
 import './style.scss';

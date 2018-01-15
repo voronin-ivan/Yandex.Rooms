@@ -12,12 +12,4 @@ app.use(bodyParser.json());
 app.use('/graphql', graphqlRoutes);
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/api/data', async (req, res) => {
-    const [users] = await sequelize.query('SELECT * FROM Users');
-    const [rooms] = await sequelize.query('SELECT * FROM Rooms');
-    const [events] = await sequelize.query('SELECT * FROM Events');
-
-    res.send({ users, rooms, events });
-});
-
 app.listen(3000, () => console.log('Express app listening on localhost:3000'));
