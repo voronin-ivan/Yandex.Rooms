@@ -23,7 +23,8 @@ export default class View extends Component {
         eventEnd: PropTypes.instanceOf(Date),
         eventMembers: PropTypes.array,
         eventRoom: PropTypes.string,
-        hasBorder: PropTypes.bool
+        hasBorder: PropTypes.bool,
+        tooltipPosition: PropTypes.string
     }
 
     state = {
@@ -32,6 +33,59 @@ export default class View extends Component {
 
     componentWillMount = () => {
         moment.locale('ru');
+    }
+
+    componentDidMount = () => {
+        if (this.props.isFree) {
+            this.cell.addEventListener('mouseenter', this._handleMouseEnter);
+            this.cell.addEventListener('mouseleave', this._handleMouseLeave);
+        }
+    }
+
+    componentWillUpdate = (nextProps, nextState) => {
+        if (nextState.showTooltip) {
+            document.addEventListener('click', this._handleClickOutside);
+        } else {
+            document.removeEventListener('click', this._handleClickOutside);
+        }
+
+        if (nextProps.isFree) {
+            this.cell.addEventListener('mouseenter', this._handleMouseEnter);
+            this.cell.addEventListener('mouseleave', this._handleMouseLeave);
+        } else {
+            document.removeEventListener('mouseenter', this._handleMouseEnter);
+            document.removeEventListener('mouseleave', this._handleMouseLeave);
+        }
+    }
+
+    componentWillUnmount = () => {
+        document.removeEventListener('click', this._handleClickOutside);
+        document.removeEventListener('mouseenter', this._handleMouseEnter);
+        document.removeEventListener('mouseleave', this._handleMouseLeave);
+    }
+
+    _handleMouseEnter = () => {
+        const roomTitle = document.getElementById(`room-${this.props.roomId}`);
+        roomTitle.style.color = '#0070E0';
+    }
+
+    _handleMouseLeave = () => {
+        const roomTitle = document.getElementById(`room-${this.props.roomId}`);
+        roomTitle.style.color = '';
+    }
+
+    _handleClickOutside = (event) => {
+        if (this.tooltip && !this.tooltip.contains(event.target)) {
+            this.setState({ showTooltip: false });
+        }
+    }
+
+    _setCellRef = (node) => {
+        this.cell = node;
+    }
+
+    _setTooltipRef = (node) => {
+        this.tooltip = node;
     }
 
     _toggleTooltip = () => {
@@ -95,7 +149,7 @@ export default class View extends Component {
     }
 
     _renderTooltip = () => {
-        if (this.state.showTooltip) {
+        if (this.state.showTooltip && this.props.eventMembers) {
             const date = moment(this.props.eventStart).format('D MMMM, LT—') + moment(this.props.eventEnd).format('LT');
             const randomNumber = Math.floor(Math.random() * this.props.eventMembers.length);
             const randomMember = this.props.eventMembers[randomNumber];
@@ -105,25 +159,36 @@ export default class View extends Component {
             ) : (
                 <div className="cell__modal-img cell__modal-img--empty"/>
             );
+            const editButton = !this.props.disabled ? (
+                <Button className="cell__modal-icon"
+                        isIcon={true}
+                        onClick={this._editEvent}>
+                    <InlineSVG src={require(`!svg-inline-loader?removeSVGTagAttrs=false!./edit.svg`)} />
+                </Button>
+            ) : null;
+            const tooltipClassNames = classNames(
+                "cell__modal",
+                {"cell__modal--left": this.props.tooltipPosition === 'left'},
+                {"cell__modal--right": this.props.tooltipPosition === 'right'}
+            )
 
             return (
-                <div className="cell__modal">
-                    <Button className="cell__modal-icon"
-                            isIcon={true}
-                            onClick={this._editEvent}>
-                        <InlineSVG src={require(`!svg-inline-loader?removeSVGTagAttrs=false!./edit.svg`)} />
-                    </Button>
-                    <div className="cell__modal-title">{this.props.eventTitle}</div>
-                    <div>
-                        <span>{date}</span>
-                        <span className="cell__modal-separator">·</span>
-                        <span>{this.props.eventRoom}</span>
-                    </div>
-                    <div className="cell__modal-info">
-                        {memberPhoto}
-                        <div>{randomMember.login}</div>
-                        <div className="cell__modal-members">
-                            {`и ещё ${this._getAllMembers(membersCount - 1)}`}
+                <div ref={this._setTooltipRef}>
+                    <div className="cell__modal-triangle"/>
+                    <div className={tooltipClassNames}>
+                        {editButton}
+                        <div className="cell__modal-title">{this.props.eventTitle}</div>
+                        <div>
+                            <span>{date}</span>
+                            <span className="cell__modal-separator">·</span>
+                            <span>{this.props.eventRoom}</span>
+                        </div>
+                        <div className="cell__modal-info">
+                            {memberPhoto}
+                            <div>{randomMember.login}</div>
+                            <div className="cell__modal-members">
+                                {`и ещё ${this._getAllMembers(membersCount - 1)}`}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -148,7 +213,8 @@ export default class View extends Component {
         return (
             <div className={cellClassNames}
                  style={{ width: cellWidth}}
-                 onClick={actionOnClick}>
+                 onClick={actionOnClick}
+                 ref={this._setCellRef}>
                 {tooltip}
             </div>
         );

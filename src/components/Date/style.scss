@@ -25,11 +25,13 @@
         cursor: pointer;
 
         @include mobile {
-            margin: 0 45px;
+            width: 100%;
+            text-align: center;
         }
     }
 
     &__icon {
+        flex-shrink: 0;
 
         @include mobile {
             width: 32px;
@@ -75,6 +77,10 @@
         width: 245px;
         border-bottom: 1px solid #E9ECEF;
         background-color: #fff;
+
+        @include mobile {
+            width: 100%;
+        }
 
         .DayPicker-wrapper {
             padding-bottom: 11px;

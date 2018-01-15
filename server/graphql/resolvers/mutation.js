@@ -35,15 +35,20 @@ module.exports = {
   createEvent (root, { input, usersIds, roomId }) {
     return models.Event.create(input)
             .then(event => {
-              event.setRoom(roomId);
               event.setUsers(usersIds);
+              event.setRoom(roomId);
               return event;
             });
   },
 
-  updateEvent (root, { id, input }) {
+  updateEvent (root, { id, input, usersIds, roomId }) {
     return models.Event.findById(id)
-            .then(event => event.update(input));
+            .then(event => {
+                event.update(input);
+                event.setUsers(usersIds);
+                event.setRoom(roomId);
+                return event;
+            });
   },
 
   addUserToEvent (root, { id, userId }) {

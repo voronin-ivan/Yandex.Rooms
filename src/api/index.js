@@ -47,6 +47,34 @@ export const addEvent = (title, dateStart, dateEnd, roomId, users) => {
     .catch(error => console.error(error));
 };
 
+export const updateEvent = (id, title, dateStart, dateEnd, roomId, users) => {
+    return fetch('/graphql', {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            query: `mutation {
+                updateEvent(
+                    id: ${id}
+                    input: {
+                        title: "${title}"
+                        dateStart: "${dateStart}"
+                        dateEnd: "${dateEnd}"
+                    }
+                    roomId: ${roomId}
+                    usersIds: [${users}]
+                )
+                { id }
+            }`
+        })
+    })
+    .then(res => res.json())
+    .then(res => res.data.createEvent)
+    .catch(error => console.error(error));
+};
+
 export const removeEvent = eventId => {
     return fetch('/graphql', {
         method: 'POST',

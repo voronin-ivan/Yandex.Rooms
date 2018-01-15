@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import ActionCreators from 'actions/ActionCreators';
 import Button from 'components/Button';
 
@@ -16,12 +17,18 @@ export default class View extends Component {
     }
 
     render() {
+        const headerClassNames = classNames(
+            "header",
+            {"header--index": !this.props.show_form}
+        );
         const button = !this.props.show_form ? (
-            <Button color="blue" onClick={this._addNewEvent}>Создать встречу</Button>
+            <Button className="header__button"
+                    color="blue"
+                    onClick={this._addNewEvent}>Создать встречу</Button>
         ) : null;
 
         return (
-            <header className="header">
+            <header className={headerClassNames}>
                 <a href="/" className="header__logo"/>
                 {button}
             </header>

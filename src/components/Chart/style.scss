@@ -4,14 +4,14 @@
     position: relative;
     width: 1675px;
     height: calc(100% - 46px);
-    padding-top: 47px;
+    padding: 47px 0 80px;
     border-left: 1px solid #E9ECEF;
     background-color: #f6f7f9;
 
     @include mobile {
         width: 1584px;
         height: 100%;
-        padding-top: 0;
+        padding: 0 0 110px;
         border-left: none;
     }
 

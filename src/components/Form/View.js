@@ -5,8 +5,9 @@ import InlineSVG from 'svg-inline-react';
 import moment from 'moment';
 import classNames from 'classnames';
 import TimeField from 'react-simple-timefield';
-import { addEvent, removeEvent } from 'api';
+import { addEvent, updateEvent, removeEvent } from 'api';
 import ActionCreators from 'actions/ActionCreators';
+import getRecommendation from 'core/utils';
 import Button from 'components/Button';
 import DatePicker from 'components/DatePicker';
 import Modal from 'components/Modal';
@@ -29,7 +30,6 @@ export default class View extends Component {
     state = {
         showDatePicker: false,
         showMemberList: false,
-        showAlertModal: false,
         showConfirmModal: false,
         theme: '',
         themeError: '',
@@ -40,12 +40,13 @@ export default class View extends Component {
         timeError: '',
         members: [],
         membersError: '',
-        room: 2,
-        roomError: ''
+        room: null,
+        roomError: '',
+        modalType: null
     }
 
     componentWillMount = () => {
-        console.log(this.props.events);
+        console.log(this.props.users);
         moment.locale('ru');
 
         if (this.props.room) {
@@ -59,8 +60,8 @@ export default class View extends Component {
             this.props.events.toJS().forEach(event => {
                 if (event.id === this.props.event_for_edit) {
                     const date = moment(event.dateStart).toDate();
-                    const timeStart = moment(event.dateStart).format('hh:mm');
-                    const timeEnd = moment(event.dateEnd).format('hh:mm');
+                    const timeStart = moment(event.dateStart).format('HH:mm');
+                    const timeEnd = moment(event.dateEnd).format('HH:mm');
                     const members = [];
 
                     event.users.forEach(user => {
@@ -78,34 +79,42 @@ export default class View extends Component {
         }
     }
 
+    componentDidMount = () => {
+        document.addEventListener('click', this._clickOutsideDate);
+        document.addEventListener('click', this._clickOutsideMembers);
+    }
+
     componentWillUnmount = () => {
         ActionCreators.setEventForEdit(null);
         ActionCreators.setRoom(null);
         ActionCreators.setTimeStart('');
         ActionCreators.setTimeEnd('');
+        document.removeEventListener('click', this._clickOutsideDate);
+        document.removeEventListener('click', this._clickOutsideMembers);
     }
 
-    _showDatePicker = () => {
-        this.setState({ showDatePicker: true });
-        this._hideMemberList();
+    _clickOutsideDate = (event) => {
+        if (this.date && !this.date.contains(event.target) && this.state.showDatePicker) {
+            this._toggleDatePicker();
+        }
     }
 
-    _hideDatePicker = () => {
-        this.setState({ showDatePicker: false });
+    _clickOutsideMembers = (event) => {
+        if (this.members && !this.members.contains(event.target) && this.state.showMemberList) {
+            this._toggleMemberList();
+        }
     }
 
-    _showMemberList = () => {
-        this.setState({ showMemberList: true });
-        this._hideDatePicker();
+    _toggleDatePicker = () => {
+        this.setState(prevState => {
+            return {showDatePicker: !prevState.showDatePicker}
+        });
     }
 
-    _hideMemberList = () => {
-        this.setState({ showMemberList: false });
-    }
-
-    _hideAllPickers = () => {
-        this._hideDatePicker();
-        this._hideMemberList();
+    _toggleMemberList = () => {
+        this.setState(prevState => {
+            return {showMemberList: !prevState.showMemberList}
+        });
     }
 
     _toggleConfirmModal = () => {
@@ -127,19 +136,29 @@ export default class View extends Component {
     }
 
     _changeDate = (date) => {
-        this.setState({ date });
-        this.setState({ dateError: ''});
-        this._hideDatePicker();
+        if (date !== this.state.date) {
+            this.setState({ date });
+            this.setState({ dateError: ''});
+            this.setState({ room: null });
+        }
+
+        this._toggleDatePicker();
     }
 
     _changeTimeStart = (time) => {
-        this.setState({ timeStart: time });
-        this.setState({ timeError: ''});
+        if (time !== this.state.timeStart) {
+            this.setState({ timeStart: time });
+            this.setState({ timeError: ''});
+            this.setState({ room: null });
+        }
     }
 
     _changeTimeEnd = (time) => {
-        this.setState({ timeEnd: time });
-        this.setState({ timeError: ''});
+        if (time !== this.state.timeEnd) {
+            this.setState({ timeEnd: time });
+            this.setState({ timeError: ''});
+            this.setState({ room: null });
+        }
     }
 
     _addMember = (id) => {
@@ -148,9 +167,10 @@ export default class View extends Component {
         members.push(id);
         this.setState({ members });
         this.setState({ membersError: '' });
+        this.setState({ room: null });
 
         if (members.length === this.props.users.length) {
-            this._hideMemberList();
+            this._toggleMemberList();
         }
     }
 
@@ -158,13 +178,19 @@ export default class View extends Component {
         const members = this.state.members.filter(member => member !== id);
 
         this.setState({ members });
+        this.setState({ room: null });
     }
 
-    _validateForm = () => {
-
+    _addRoom = (roomId) => {
+        this.setState({ room: roomId });
+        this.setState({ roomError: ''});
     }
 
-    _addEvent = () => {
+    _removeRoom = () => {
+        this.setState({ room: null });
+    }
+
+    _submitForm = () => {
         const theme = this.state.theme;
         const date = this.state.date;
         const timeStart = this.state.timeStart.split(':');
@@ -186,7 +212,7 @@ export default class View extends Component {
             this.setState({ membersError: 'Для встречи необходимо минимум 2 участника'});
         }
 
-        if (!room) {
+        if (!room && date) {
             isFormValid = false;
             this.setState({ roomError: 'Выберите комнату для встречи'});
         }
@@ -227,8 +253,16 @@ export default class View extends Component {
             return null;
         }
 
+        if (this.props.event_for_edit) {
+            this._updateEvent(this.props.event_for_edit, theme, dateStart, dateEnd, room, members);
+        } else {
+            this._addEvent(theme, dateStart, dateEnd, room, members);
+        }
+    }
+
+    _addEvent = (theme, dateStart, dateEnd, room, members) => {
         addEvent(theme, dateStart, dateEnd, room, members)
-            .then((data) => {
+            .then(data => {
                 const users = [];
 
                 members.forEach(member => {
@@ -251,7 +285,42 @@ export default class View extends Component {
                 const events = this.props.events.push(event);
 
                 ActionCreators.setEvents(events);
-                this.setState({ showAlertModal: true });
+                this.setState({ modalType: 'eventCreated' });
+            });
+    }
+
+    _updateEvent = (eventId, theme, dateStart, dateEnd, room, members) => {
+        updateEvent(eventId, theme, dateStart, dateEnd, room, members)
+            .then(() => {
+                const users = [];
+
+                members.forEach(member => {
+                    users.push({
+                        id: member
+                    });
+                });
+
+                const event = {
+                    id: eventId,
+                    title: theme,
+                    users,
+                    dateStart,
+                    dateEnd,
+                    room: {
+                        id: String(room)
+                    }
+                };
+
+                let events = this.props.events;
+
+                for (let i = 0; i < events.size; i++) {
+                    if (events.get(i).id === eventId) {
+                        events = events.set(i, event);
+                    }
+                }
+
+                ActionCreators.setEvents(events);
+                this.setState({ modalType: 'eventUpdated' });
             });
     }
 
@@ -263,8 +332,8 @@ export default class View extends Component {
         removeEvent(this.props.event_for_edit)
             .then(() => {
                 ActionCreators.setEvents(events);
+                this.setState({ modalType: 'eventRemoved' });
             });
-        ActionCreators.setShowForm(false);
     }
 
     _closeForm = () => {
@@ -272,9 +341,13 @@ export default class View extends Component {
     }
 
     _renderThemeBlock = () => {
-        console.log(this.props.events);
         const error = this.state.themeError ? (
             <div className="form__error">{this.state.themeError}</div>
+        ) : null;
+        const removeIcon = this.state.theme ? (
+            <InlineSVG className="form__input-icon form__input-icon--remove"
+                       src={require(`!svg-inline-loader?removeSVGTagAttrs=false!./close.svg`)}
+                       onClick={this._clearTheme} />
         ) : null;
 
         return (
@@ -285,12 +358,9 @@ export default class View extends Component {
                        className="form__input form__input--with-icon"
                        value={this.state.theme}
                        onChange={this._changeTheme}
-                       onFocus={this._hideAllPickers}
                        placeholder="О чём будете говорить?"/>
                 {error}
-                <InlineSVG className="form__input-icon form__input-icon--remove"
-                           src={require(`!svg-inline-loader?removeSVGTagAttrs=false!./close.svg`)}
-                           onClick={this._clearTheme} />
+                {removeIcon}
             </div>
         )
     }
@@ -302,8 +372,9 @@ export default class View extends Component {
         const pickerDate = date ? date : new Date();
         const datePicker = this.state.showDatePicker ? (
             <DatePicker className="form__date-picker"
+                        isForForm={true}
                         date={pickerDate}
-                        onFocus={this._showDatePicker}
+                        onFocus={this._toggleDatePicker}
                         onDayClick={this._changeDate} />
         ) : null;
         const inputClassNames = classNames(
@@ -318,13 +389,13 @@ export default class View extends Component {
         ) : null;
 
         return (
-            <div className="form__date-wrapper">
+            <div className="form__date-wrapper" ref={node => this.date = node}>
                 <label htmlFor="date" className="form__label">Дата</label>
                 <input id="date"
                        className={inputClassNames}
                        value={inputValue}
                        onChange={this._changeDate}
-                       onFocus={this._showDatePicker}
+                       onFocus={this._toggleDatePicker}
                        placeholder='Выберите дату'/>
                 {datePicker}
                 {error}
@@ -336,7 +407,7 @@ export default class View extends Component {
 
     _renderTimeBlock = () => {
         const input = (
-            <input className="form__input form__input--small" onFocus={this._hideAllPickers}/>
+            <input className="form__input form__input--small"/>
         );
         const error = this.state.timeError ? (
             <div className="form__error">{this.state.timeError}</div>
@@ -436,12 +507,12 @@ export default class View extends Component {
         }
 
         return (
-            <div className="form__row-block form__row-block--members">
+            <div className="form__row-block form__row-block--members" ref={node => this.members = node}>
                 <label htmlFor="members" className="form__label">Участники</label>
                 <input type="text"
                        id="members"
                        className={inputClassNames}
-                       onFocus={this._showMemberList}
+                       onFocus={this._toggleMemberList}
                        placeholder="Выберите участников"/>
                 {this.state.showMemberList ? (
                     <div className="form__select">
@@ -454,6 +525,101 @@ export default class View extends Component {
                     </div>
                 ) : null}
                 {error}
+            </div>
+        );
+    }
+
+    _renderRoomBlock = () => {
+        if (this.state.room) {
+            let roomInfo = null;
+
+            this.props.rooms.forEach(room => {
+                if (room.id == this.state.room) {
+                    roomInfo = `${room.title} · ${room.floor} этаж`;
+                }
+            });
+
+            return (
+                <div className="form__row-block">
+                    <div className="form__rooms-title">Ваша переговорка</div>
+                    <div className="form__rooms-item form__rooms-item--choosed">
+                        <div className="form__room-wrapper">
+                            <div className="form__room-time">{this.state.timeStart}—{this.state.timeEnd}</div>
+                            <div className="form__room-name">{roomInfo}</div>
+                        </div>
+                        <InlineSVG className="form__room-remove"
+                                   src={require(`!svg-inline-loader?removeSVGTagAttrs=false!./close.svg`)}
+                                   onClick={this._removeRoom}/>
+                    </div>
+                </div>
+            );
+        }
+
+        const recommendatedRooms = [];
+        const error = this.state.roomError ? (
+            <div className="form__error">{this.state.roomError}</div>
+        ) : null;
+
+        if (!this.state.room && this.state.date && this.state.members.length > 0) {
+            const date = {
+                day: this.state.date,
+                timeStart: this.state.timeStart.split(':'),
+                timeEnd: this.state.timeEnd.split(':')
+            };
+            const db = {
+                users: this.props.users,
+                rooms: this.props.rooms,
+                events: this.props.events.toJS()
+            };
+            const recommendatations = getRecommendation(date, this.state.members, db);
+
+            if (recommendatations.newTime) {
+                const start = recommendatations.newTime.start;
+                const end = recommendatations.newTime.end;
+                const startHour = start / 60 > 9 ? Math.floor(start / 60) : `0${Math.floor(start / 60)}`;
+                const startMinute = start % 60 > 9 ? start % 60 : `0${start % 60}`;
+                const endHour = end / 60 > 9 ? Math.floor(end / 60) : `0${Math.floor(end / 60)}`;
+                const endMinute = end % 60 > 9 ? end % 60 : `0${end % 60}`;
+
+                this.setState({
+                    timeStart: `${startHour}:${startMinute}`,
+                    timeEnd: `${endHour}:${endMinute}`
+                });
+            }
+
+            if (recommendatations.rooms.length > 0) {
+                recommendatations.rooms.forEach(recommendatedRoom => {
+                    this.props.rooms.forEach(room => {
+                        if (recommendatedRoom == room.id) {
+                            recommendatedRooms.push(
+                                <div className="form__rooms-item"
+                                     key={`recommendatedRoom-${room.id}`}
+                                     onClick={this._addRoom.bind(this, room.id)}>
+                                    <div className="form__room-wrapper">
+                                        <div className="form__room-time">{this.state.timeStart}—{this.state.timeEnd}</div>
+                                        <div className="form__room-name">{`${room.title} · ${room.floor} этаж`}</div>
+                                    </div>
+                                </div>
+                            );
+                        }
+                    });
+                });
+            } else {
+                recommendatedRooms.push(
+                    <div className="form__rooms-error" key="room-error">К сожалению, не удается подобрать вам комнату. Попробуйте установить другую дату/время или сократить список участников.</div>
+                )
+            }
+        }
+
+        return (
+            <div className="form__row-block">
+                {recommendatedRooms.length > 0 ? (
+                    <div>
+                        <div className="form__rooms-title">Рекомендуемые переговорки</div>
+                        <div>{recommendatedRooms}</div>
+                        {error}
+                    </div>
+                ) : null}
             </div>
         );
     }
@@ -471,7 +637,7 @@ export default class View extends Component {
                     <Button className="form__buttons-item" onClick={this._closeForm}>Отмена</Button>
                     <Button className="form__buttons-item" onClick={this._toggleConfirmModal}>Удалить встречу</Button>
                     <Button className="form__buttons-item"
-                            onClick={this._closeForm}
+                            onClick={this._submitForm}
                             disabled={isButtonDisabled}>Сохранить</Button>
                 </div>
             ) : (
@@ -479,7 +645,7 @@ export default class View extends Component {
                     <Button className="form__buttons-item" onClick={this._closeForm}>Отмена</Button>
                     <Button className="form__buttons-item"
                             color="blue"
-                            onClick={this._addEvent}
+                            onClick={this._submitForm}
                             disabled={isButtonDisabled}>Создать встречу</Button>
                 </div>
             )
@@ -497,9 +663,10 @@ export default class View extends Component {
         });
 
         return (
-            <Modal isAlert={true}
+            <Modal type={this.state.modalType}
                    date={date}
-                   room={roomInfo} />
+                   room={roomInfo}
+                   onConfirm={this._closeForm} />
         );
     }
 
@@ -511,16 +678,16 @@ export default class View extends Component {
 
     render() {
         const formTitle = this.props.event_for_edit ? 'Редактирование встречи' : 'Новая встреча';
-        const roomBlockTitle = this.state.room ? 'Ваша переговорка' : 'Рекомендуемые переговорки';
         const themeBlock = this._renderThemeBlock();
         const dateBlock = this._renderDateBlock();
         const timeBlock = this._renderTimeBlock();
         const membersBlock = this._renderMembersBlock();
+        const roomBlock = this._renderRoomBlock();
         const buttonsBlock = this._renderButtonsBlock();
         const alertModal = this._renderAlertModal();
         const confirmModal = this.state.showConfirmModal ? this._renderConfirmModal() : null;
 
-        if (this.state.showAlertModal) {
+        if (this.state.modalType) {
             return alertModal;
         }
 
@@ -542,9 +709,7 @@ export default class View extends Component {
                     </div>
                     <div className="form__row">
                         {membersBlock}
-                        <div className="form__row-block">
-                            <div className="form__rooms-title">{roomBlockTitle}</div>
-                        </div>
+                        {roomBlock}
                     </div>
                 </div>
                 {buttonsBlock}

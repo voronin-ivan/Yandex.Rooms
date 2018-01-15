@@ -1,4 +1,4 @@
-import Actions from 'constants/Actions';
+import Actions from 'core/Actions';
 import Dispatcher from 'core/Dispatcher';
 
 const actionCreators = {

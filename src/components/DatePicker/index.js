@@ -9,6 +9,7 @@ import './style.scss';
 export default class DatePicker extends Component {
 
     static propTypes = {
+        isForForm: PropTypes.bool,
         className: PropTypes.string,
         date: PropTypes.instanceOf(Date),
         onFocus: PropTypes.func,
@@ -16,7 +17,7 @@ export default class DatePicker extends Component {
     }
 
     render() {
-        const timeFrom = moment().subtract(1.5, 'months').toDate();
+        const timeFrom = this.props.isForForm ? new Date() : moment().subtract(1.5, 'months').toDate();
         const timeTo = moment().add(1.5, 'months').toDate();
         const disabledDays = {
             before: timeFrom,

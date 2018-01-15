@@ -1,6 +1,6 @@
 import { ReduceStore } from 'flux/utils';
 import Dispatcher from 'core/Dispatcher';
-import Actions from 'constants/Actions';
+import Actions from 'core/Actions';
 import { Map } from 'immutable';
 
 class UIStore extends ReduceStore {

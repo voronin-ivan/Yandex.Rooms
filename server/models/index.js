@@ -6,7 +6,7 @@ const sequelize = new Sequelize({
   dialect: 'sqlite',
   storage: 'db.sqlite3',
   operatorsAliases: { $and: Op.and },
-  // logging: false
+  logging: false
 });
 
 scheme(sequelize);

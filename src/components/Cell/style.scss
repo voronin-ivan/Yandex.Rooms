@@ -88,7 +88,7 @@
     }
 
     &--border {
-        border-left: 1px solid #98A9B9;
+        border-right: 1px solid #98A9B9;
     }
 
     &__modal {
@@ -97,7 +97,7 @@
         top: 28px;
         left: 50%;
         transform: translateX(-50%);
-        width: 300px;
+        width: 338px;
         padding: 14px 16px 16px;
         font-size: 13px;
         line-height: 17px;
@@ -112,25 +112,39 @@
             font-size: 15px;
         }
 
-        &::before {
-            position: absolute;
-            top: -9px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: block;
-            content: '';
-            width: 0;
-            height: 0;
-            border-style: solid;
-            border-width: 0 9px 10px 9px;
-            border-color: transparent transparent #fff transparent;
+        &--left {
+            left: 140px;
+        }
+
+        &--right {
+            left: auto;
+            right: -185px;
+        }
+    }
+
+    &__modal-triangle {
+        position: absolute;
+        z-index: 4;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        display: block;
+        content: '';
+        width: 0;
+        height: 0;
+        border-style: solid;
+        border-width: 0 9px 10px 9px;
+        border-color: transparent transparent #fff transparent;
+
+        @include mobile {
+            bottom: 28px;
         }
     }
 
     &__modal-icon {
         position: absolute;
-        top: 8px;
-        right: 8px;
+        top: 14px;
+        right: 14px;
         cursor: pointer;
 
         @include mobile {
@@ -141,7 +155,7 @@
 
     &__modal-title {
         margin-bottom: 3px;
-        padding-right: 30px;
+        padding-right: 35px;
         font-weight: bold;
         font-size: 15px;
         line-height: 24px;

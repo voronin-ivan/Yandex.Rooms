@@ -9,36 +9,41 @@ import './style.scss';
 export default class Modal extends Component {
 
     static propTypes = {
-        isAlert: PropTypes.bool,
+        type: PropTypes.string,
         date: PropTypes.string,
         room: PropTypes.string,
         onConfirm: PropTypes.func,
         onReject: PropTypes.func
     }
 
+    state = {
+        isAlert: true
+    }
+
     componentWillMount = () => {
-        document.addEventListener('keyup', this._handleKeyUp);
-    }
-
-    componentWillUnmount = () => {
-        document.removeEventListener('keyup', this._handleKeyUp);
-    }
-
-    _handleKeyUp = (event) => {
-        if (event.keyCode === 27) {
-            this.props.isAlert ? this._closeForm() : this.props.onReject();
+        if (!this.props.type) {
+            this.setState({ isAlert: false });
         }
-    };
+    }
 
-    _closeForm = () => {
-        ActionCreators.setShowForm(false);
+    _getModalTitle = () => {
+        switch(this.props.type) {
+            case 'eventCreated':
+                return 'Встреча создана!';
+            case 'eventUpdated':
+                return 'Встреча отредактирована!';
+            case 'eventRemoved':
+                return 'Встреча удалена!';
+            default:
+                return 'Встреча будет удалена безвозвратно';
+       }
     }
 
     render() {
-        const title = this.props.isAlert ? 'Встреча создана!' : 'Встреча будет удалена безвозвратно';
+        const title = this._getModalTitle();
         const iconClassNames = classNames(
             "modal__body-icon",
-            {"modal__body-icon--alert": this.props.isAlert}
+            {"modal__body-icon--alert": this.state.isAlert}
         );
 
         return (
@@ -46,17 +51,17 @@ export default class Modal extends Component {
                 <div className="modal__body">
                     <div className={iconClassNames}/>
                     <div className="modal__body-title">{title}</div>
-                    {this.props.isAlert ? (
+                    {this.state.isAlert && this.props.type !== 'eventRemoved' ? (
                         <div className="modal__body-message">
                             <div>{this.props.date}</div>
                             <div>{this.props.room}</div>
                         </div>
                     ) : null}
-                    {this.props.isAlert ? (
+                    {this.state.isAlert ? (
                         <div className="modal__body-buttons">
                             <Button className="modal__button"
                                     color="blue"
-                                    onClick={this._closeForm}>Хорошо</Button>
+                                    onClick={this.props.onConfirm}>Хорошо</Button>
                         </div>
                     ) : (
                         <div className="modal__body-buttons">

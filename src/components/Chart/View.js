@@ -78,6 +78,7 @@ export default class View extends Component {
 
                 cells.push(
                     <Cell isFree={true}
+                          key={`cell-${time}-${roomId}`}
                           roomId={roomId}
                           timeStart={time}
                           duration={eventDuration}
@@ -90,6 +91,7 @@ export default class View extends Component {
             for (let i = 0; i < cellsCount; i++) {
                 cells.push(
                     <Cell isFree={true}
+                          key={`cell-${time}-${roomId}`}
                           roomId={roomId}
                           timeStart={time}
                           duration={60}
@@ -105,7 +107,19 @@ export default class View extends Component {
             const eventStart = moment(dateStart).hour() * 60 + moment(dateStart).minutes();
             const eventEnd = moment(dateEnd).hour() * 60 + moment(dateEnd).minutes();
             const eventDuration = eventEnd - eventStart;
-            const beforeStartFromHour = eventStart % 60;
+            let beforeStartFromHour = 0;
+
+            /*
+                Для правильного вывода пограничных случаев, к примеру:
+                Одна встреча заканчивается в 22:45, а другая начинается в 23:05
+                (seems legit :D)
+            */
+            if (eventStart - time <= 20) {
+                beforeStartFromHour = eventStart - time;
+            } else {
+                beforeStartFromHour = eventStart % 60;
+            }
+
             const beforeEventHour = eventStart - beforeStartFromHour - time;
 
             if (beforeEventHour > 0) {
@@ -114,6 +128,7 @@ export default class View extends Component {
                 if (beforeEventHour % 60 !== 0) {
                     cells.push(
                         <Cell isFree={true}
+                              key={`cell-${time}-${roomId}`}
                               roomId={roomId}
                               timeStart={time}
                               duration={beforeEventHour % 60}
@@ -126,6 +141,7 @@ export default class View extends Component {
                 for (let i = 0; i < freeCellsCount; i++) {
                     cells.push(
                         <Cell isFree={true}
+                              key={`cell-${time}-${roomId}`}
                               roomId={roomId}
                               timeStart={time}
                               duration={60}
@@ -139,6 +155,7 @@ export default class View extends Component {
             if (beforeStartFromHour) {
                 cells.push(
                     <Cell isFree={true}
+                          key={`cell-${time}-${roomId}`}
                           roomId={roomId}
                           timeStart={time}
                           duration={beforeStartFromHour}
@@ -147,15 +164,26 @@ export default class View extends Component {
 
                 time += beforeStartFromHour;
             }
-            // hasBorder: PropTypes.bool
 
             let roomTitle = null;
+            let hasBorder = false;
 
             this.props.rooms.forEach(room => {
                 if (room.id === String(roomId)) {
                     roomTitle = room.title;
                 }
             });
+
+            if (events.length > 1) {
+                const nextEvent = events[events.length - 2];
+                let nextEventStart = moment(nextEvent.dateStart).toDate();
+
+                nextEventStart = moment(nextEventStart).hour() * 60 + moment(nextEventStart).minutes();
+
+                if (eventEnd === nextEventStart) {
+                    hasBorder = true;
+                }
+            }
 
             const members = this.props.users.filter(user => {
                 for (let i = 0; i < event.users.length; i++) {
@@ -167,6 +195,14 @@ export default class View extends Component {
                 return false;
             });
 
+            let tooltipPosition = null;
+
+            if (time < 150) {
+                tooltipPosition = 'left';
+            } else if (time + eventDuration > 1350) {
+                tooltipPosition = 'right';
+            }
+
             cells.push(
                 <Cell eventId={event.id}
                       eventTitle={event.title}
@@ -175,10 +211,18 @@ export default class View extends Component {
                       eventMembers={members}
                       eventRoom={roomTitle}
                       duration={eventDuration}
-                      hasBorder={false}/>
+                      disabled={this._isPastTime(time)}
+                      hasBorder={hasBorder}
+                      tooltipPosition={tooltipPosition}
+                      key={`cell-${time}-${roomId}`}/>
             );
 
             time += eventDuration;
+
+            if (time > 1440) {
+                time = 1440;
+            }
+
             events = events.filter(item => {
                 return item.id !== event.id;
             });
@@ -194,8 +238,6 @@ export default class View extends Component {
             return moment(this.props.date).isSame(event.dateStart, 'day');
         });
         const eventsBlocks = [];
-
-        console.log(events);
 
         rooms.forEach(room => {
             if (floors[floors.length - 1] !== room.floor) {
@@ -217,14 +259,14 @@ export default class View extends Component {
                 const cells = this._renderCells(0, roomEvents, +room.id);
 
                 rows.push(
-                    <div className="chart__row">
+                    <div className="chart__row" key={`room-row-${room.id}`}>
                         {cells}
                     </div>
                 );
             });
 
             eventsBlocks.push(
-                <div>{rows}</div>
+                <div key={`row-${i}`}>{rows}</div>
             );
         }
 

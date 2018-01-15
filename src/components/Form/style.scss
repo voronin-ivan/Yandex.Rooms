@@ -242,19 +242,13 @@
     }
 
     &__select {
-        position: absolute;
-        z-index: 1;
-        top: 57px;
-        left: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        overflow: auto;
         width: 100%;
         min-height: 34px;
         max-height: 136px;
+        overflow: auto;
         font-size: 13px;
+        line-height: 34px;
+        text-align: center;
         border-radius: 4px;
         background-color: #fff;
         box-shadow: 0 1px 10px 0 rgba(0, 44, 92, 0.28);
@@ -269,6 +263,7 @@
     &__select-option {
         display: flex;
         align-items: center;
+        flex-shrink: 0;
         width: 100%;
         height: 34px;
         padding: 0 16px;
@@ -344,6 +339,11 @@
             width: 32px;
             height: 32px;
         }
+
+        &--empty {
+            background: url('user.svg') no-repeat center;
+            background-size: cover;
+        }
     }
 
     &__member-remove {
@@ -409,6 +409,11 @@
         }
     }
 
+    &__rooms-error {
+        font-style: italic;
+        font-size: 14px;
+    }
+
     &__room-wrapper {
         display: flex;
         align-items: center;
@@ -424,7 +429,7 @@
         }
     }
 
-    &__room-delete {
+    &__room-remove {
         cursor: pointer;
 
         @include mobile {
@@ -432,7 +437,7 @@
             height: 14px;
         }
 
-        .icon__svg-fill {
+        .icon-fill {
             fill: #fff;
         }
     }
