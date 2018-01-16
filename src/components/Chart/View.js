@@ -10,7 +10,6 @@ import './style.scss';
 export default class View extends Component {
 
     static propTypes = {
-        users: PropTypes.array,
         events: PropTypes.instanceOf(Immutable.List),
         rooms: PropTypes.array,
         date: PropTypes.instanceOf(Date)

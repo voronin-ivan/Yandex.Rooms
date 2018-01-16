@@ -4,7 +4,7 @@ import Immutable from 'immutable';
 import InlineSVG from 'svg-inline-react';
 import moment from 'moment';
 import classNames from 'classnames';
-import TimeField from 'react-simple-timefield';
+import TimeField from 'react-simple-timefield'; // выпилить и написать свое нормальное решение
 import { addEvent, updateEvent, removeEvent } from 'api';
 import ActionCreators from 'actions/ActionCreators';
 import getRecommendation from 'core/utils';

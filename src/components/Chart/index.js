@@ -15,7 +15,6 @@ class Chart extends Component {
         const UIStoreState = UIStore.getState();
 
         return {
-            users: GeneralStoreState.get('users'),
             rooms: GeneralStoreState.get('rooms'),
             events: GeneralStoreState.get('events'),
             date: UIStoreState.get('date')
