@@ -17,7 +17,7 @@ export const months = [
     'декабря'
 ];
 
-export default (date, members, db) => {
+export const getRecommendation = (date, members, db) => {
     const eventsOnThisDay = db.events.filter(event => {
         if (db.eventForEdit) {
             return moment(event.dateStart).isSame(date.day, 'day') && event.id !== db.eventForEdit;

@@ -7,7 +7,7 @@ import classNames from 'classnames';
 import TimeField from 'react-simple-timefield'; // выпилить и написать свое нормальное решение
 import { addEvent, updateEvent, removeEvent } from 'api';
 import ActionCreators from 'actions/ActionCreators';
-import getRecommendation from 'core/utils';
+import { getRecommendation } from 'core/utils';
 import Button from 'components/Button';
 import DatePicker from 'components/DatePicker';
 import Modal from 'components/Modal';

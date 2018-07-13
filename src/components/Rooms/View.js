@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 
 import './style.scss';
 
@@ -9,10 +10,40 @@ export default class View extends Component {
         rooms: PropTypes.array
     }
 
+    state = {
+        isTitleVisible: true
+    }
+
+    componentDidMount = () => {
+        if (document.body.clientWidth < 768) {
+            const wrapper = document.querySelector('.wrapper');
+            const roomsColumn = document.querySelector('.left-col');
+
+            wrapper.onscroll = () => {
+                if (this._checkElementVisible(roomsColumn)) {
+                    this.setState({ isTitleVisible: true });
+                } else {
+                    this.setState({ isTitleVisible: false });
+                }
+            };
+        }
+    }
+
+    _checkElementVisible = (element) => {
+        const rect = element.getBoundingClientRect();
+        const viewWidth = Math.max(document.documentElement.clientWidth, window.innerWidth);
+
+        return !(rect.right < 0 || rect.left - viewWidth >= 0);
+    }
+
     _renderRooms = () => {
         const rooms = this.props.rooms.sort((a, b) => a.floor - b.floor);
         const floors = [];
         const roomsBlock = [];
+        const titleClassNames = classNames(
+            'rooms__item-title',
+            {'rooms__item-title--sticky': !this.state.isTitleVisible}
+        );
 
         rooms.forEach(room => {
             if (floors[floors.length - 1] !== room.floor) {
@@ -27,7 +58,7 @@ export default class View extends Component {
             roomsOnFloor.forEach(room => {
                 roomsTitles.push(
                     <div className="rooms__item" key={`room-${room.id}`}>
-                        <div id={`room-${room.id}`} className="rooms__item-title">{room.title}</div>
+                        <div id={`room-${room.id}`} className={titleClassNames}>{room.title}</div>
                         <div>до {room.capacity} человек</div>
                     </div>
                 );

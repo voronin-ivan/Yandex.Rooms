@@ -12,7 +12,9 @@
     background-color: #fff;
 
     @include mobile {
+        position: fixed;
         padding: 25px 0 0;
+        overflow: auto;
     }
 
     &__container {
@@ -153,7 +155,7 @@
             width: 72px;
 
             @include mobile {
-                width: 100%;
+                width: 100px;
             }
         }
 
@@ -215,6 +217,7 @@
         align-items: flex-start;
 
         @include mobile {
+            width: 100%;
             margin-bottom: 10px;
         }
     }
@@ -226,6 +229,7 @@
         width: 165px;
 
         @include mobile {
+            width: 100%;
             justify-content: center;
         }
     }
@@ -458,7 +462,7 @@
         border-top: 1px solid #E9ECEF;
 
         @include mobile {
-            padding: 0 0 18px;
+            padding: 20px 0;
         }
     }
 
@@ -515,6 +519,10 @@
         font-size: 13px;
         line-height: 15px;
         color: #ff0400;
+
+        @include mobile {
+            text-align: center;
+        }
     }
 
     // show scrollbar on members-list always on macOS

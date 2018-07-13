@@ -1,10 +1,11 @@
 {
-  "name": "entrance-task-3",
-  "version": "1.0.0",
-  "description": "",
+  "name": "Yandex.Rooms",
+  "version": "1.0.1",
+  "description": "Application for managing meeting rooms",
   "main": "index.js",
   "scripts": {
-    "dev": "npm run dev --prefix server | webpack-dev-server --inline --content-base ./public"
+    "dev": "nodemon server | webpack-dev-server --inline --watch-content-base ./public",
+    "reset-db": "rm -f .db.sqlite3 && node ./server/create-mock-data.js"
   },
   "repository": {
     "type": "git",
@@ -16,12 +17,8 @@
     "url": "https://github.com/voronin-ivan/entrance-task-3/issues"
   },
   "homepage": "https://github.com/voronin-ivan/entrance-task-3#readme",
-  "babel": {
-    "presets": [
-      "es2015",
-      "stage-0",
-      "react"
-    ]
+  "engines": {
+    "node": "9.7.0"
   },
   "dependencies": {
     "express": "4.16.2",
