@@ -1,12 +1,15 @@
 const path = require('path');
 const autoprefixer = require('autoprefixer');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+
+const outputPath = process.env.NODE_ENV === 'prod' ? 'build' : 'public';
 
 module.exports = {
     entry: './src/index.js',
     output: {
         filename: 'bundle.js',
-        path: path.resolve(__dirname, 'public'),
+        path: path.resolve(__dirname, outputPath),
     },
     devServer: {
         port: 8000,
@@ -26,9 +29,7 @@ module.exports = {
                 test: /\.css$/,
                 use: ExtractTextPlugin.extract({
                     fallback: 'style-loader',
-                    use: [
-                        { loader: 'css-loader' }
-                    ]
+                    use: 'css-loader'
                 })
             },
             {
@@ -36,16 +37,9 @@ module.exports = {
                 use: ExtractTextPlugin.extract({
                     fallback: 'style-loader',
                     use: [
-                        { loader: 'css-loader' },
-                        {
-                            loader: 'postcss-loader',
-                            options: {
-                                plugins: function() {
-                                    return [autoprefixer('last 2 versions', 'ie 10', 'iOS 8')];
-                                }
-                            }
-                        },
-                        { loader: 'sass-loader' }
+                        'css-loader',
+                        'postcss-loader',
+                        'sass-loader'
                     ]
                 })
             },
@@ -63,7 +57,11 @@ module.exports = {
     plugins: [
         new ExtractTextPlugin({
             filename: 'style.css'
-        })
+        }),
+        new CopyWebpackPlugin([{
+            from: path.resolve(__dirname, 'public'),
+            to: path.resolve(__dirname, 'build')
+        }])
     ],
     resolve: {
         modules: [

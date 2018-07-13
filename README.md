@@ -15,10 +15,22 @@
 $ npm install
 ```
 
-#### Запуск (dev-mode)
+#### Сборка клиентской части
+
+```sh
+$ npm run build
+```
+
+#### Запуск (development)
 
 ```sh
 $ npm run dev
+```
+
+#### Запуск (production)
+
+```sh
+$ npm start
 ```
 
 ### Описание интерфейса

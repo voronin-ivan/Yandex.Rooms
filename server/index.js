@@ -7,9 +7,10 @@ const graphqlRoutes = require('./graphql/routes');
 const { sequelize } = require('./models/');
 
 const app = express();
+const staticPath = process.env.NODE_ENV === 'prod' ? '../build' : 'public';
 
 app.use(bodyParser.json());
 app.use('/graphql', graphqlRoutes);
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, staticPath)));
 
 app.listen(3000, () => console.log('Express app listening on localhost:3000'));
