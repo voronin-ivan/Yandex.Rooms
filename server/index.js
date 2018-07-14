@@ -12,6 +12,6 @@ const PORT = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 app.use('/graphql', graphqlRoutes);
-app.use(express.static(path.join(__dirname, staticPath)));
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.listen(3000, () => console.log(`Express app listening on port ${PORT}`));
