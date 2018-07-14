@@ -1,5 +1,5 @@
 {
-  "name": "Yandex.Rooms",
+  "name": "yandex.rooms",
   "version": "1.0.1",
   "description": "Application for managing meeting rooms",
   "main": "index.js",

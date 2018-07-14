@@ -1,15 +1,16 @@
 const path = require('path');
+const webpack = require("webpack");
 const autoprefixer = require('autoprefixer');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
-const outputPath = process.env.NODE_ENV === 'prod' ? 'build' : 'public';
+const isProduction = process.env.NODE_ENV === 'prod';
 
 module.exports = {
     entry: './src/index.js',
     output: {
         filename: 'bundle.js',
-        path: path.resolve(__dirname, outputPath),
+        path: path.resolve(__dirname, isProduction ? 'build' : 'public'),
     },
     devServer: {
         port: 8000,
@@ -37,7 +38,12 @@ module.exports = {
                 use: ExtractTextPlugin.extract({
                     fallback: 'style-loader',
                     use: [
-                        'css-loader',
+                        {
+                            loader: 'css-loader',
+                            options: {
+                                minimize: isProduction
+                            }
+                        },
                         'postcss-loader',
                         'sass-loader'
                     ]
@@ -55,9 +61,8 @@ module.exports = {
         ]
     },
     plugins: [
-        new ExtractTextPlugin({
-            filename: 'style.css'
-        }),
+        new webpack.optimize.UglifyJsPlugin({ isProduction: true }),
+        new ExtractTextPlugin({ filename: 'style.css' }),
         new CopyWebpackPlugin([{
             from: path.resolve(__dirname, 'public'),
             to: path.resolve(__dirname, 'build')
