@@ -8,9 +8,11 @@ const { sequelize } = require('./models/');
 
 const app = express();
 const staticPath = process.env.NODE_ENV === 'prod' ? '../build' : 'public';
+const HOSTNAME = process.env.HOST || 'localhost';
+const PORT = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 app.use('/graphql', graphqlRoutes);
 app.use(express.static(path.join(__dirname, staticPath)));
 
-app.listen(3000, () => console.log('Express app listening on localhost:3000'));
+app.listen(3000, () => console.log(`Express app listening on ${HOSTNAME}:${PORT}`));
